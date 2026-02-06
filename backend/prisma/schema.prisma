@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum ObligationType {
+  PAYMENT
+  DOCUMENT
+  APPROVAL
+}
+
+enum ObligationStatus {
+  PENDING
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  CHANGES_REQUESTED
+  OVERDUE
+}
+
+model Workspace {
+  id          String       @id @default(cuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  users       User[]
+  clients     Client[]
+  obligations Obligation[]
+  comments    Comment[]
+  activityLogs ActivityLog[]
+  attachments Attachment[]
+}
+
+model User {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id])
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role
+  clientId     String?
+  client       Client?   @relation(fields: [clientId], references: [id])
+  createdAt    DateTime  @default(now())
+  comments     Comment[]
+}
+
+model Client {
+  id          String       @id @default(cuid())
+  workspaceId String
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id])
+  name        String
+  email       String?
+  createdAt   DateTime     @default(now())
+  users       User[]
+  obligations Obligation[]
+}
+
+model Obligation {
+  id          String           @id @default(cuid())
+  workspaceId String
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id])
+  clientId    String
+  client      Client           @relation(fields: [clientId], references: [id])
+  title       String
+  type        ObligationType
+  status      ObligationStatus
+  dueDate     DateTime
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  comments    Comment[]
+  attachments Attachment[]
+}
+
+model Comment {
+  id           String     @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace  @relation(fields: [workspaceId], references: [id])
+  obligationId String
+  obligation   Obligation @relation(fields: [obligationId], references: [id])
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  message      String
+  createdAt    DateTime   @default(now())
+}
+
+model Attachment {
+  id           String     @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace  @relation(fields: [workspaceId], references: [id])
+  obligationId String
+  obligation   Obligation @relation(fields: [obligationId], references: [id])
+  fileName     String
+  fileUrl      String
+  createdAt    DateTime   @default(now())
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  actorUserId String
+  entityType  String   // e.g. OBLIGATION, CLIENT
+  entityId    String
+  action      String   // e.g. CREATED, STATUS_CHANGED
+  meta        Json?
+  createdAt   DateTime @default(now())
+}

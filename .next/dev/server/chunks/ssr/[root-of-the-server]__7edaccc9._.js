@@ -1,0 +1,629 @@
+module.exports = [
+"[externals]/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js [external] (next/dist/compiled/next-server/app-page-turbo.runtime.dev.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("next/dist/compiled/next-server/app-page-turbo.runtime.dev.js", () => require("next/dist/compiled/next-server/app-page-turbo.runtime.dev.js"));
+
+module.exports = mod;
+}),
+"[project]/components/theme-provider.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "ThemeProvider",
+    ()=>ThemeProvider
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2d$themes$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next-themes/dist/index.mjs [app-ssr] (ecmascript)");
+"use client";
+;
+;
+function ThemeProvider({ children, ...props }) {
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2d$themes$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ThemeProvider"], {
+        ...props,
+        children: children
+    }, void 0, false, {
+        fileName: "[project]/components/theme-provider.tsx",
+        lineNumber: 10,
+        columnNumber: 10
+    }, this);
+}
+}),
+"[project]/lib/i18n.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "I18nProvider",
+    ()=>I18nProvider,
+    "useI18n",
+    ()=>useI18n
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
+"use client";
+;
+;
+const I18nContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createContext"])(undefined);
+const translations = {
+    en: {
+        // Sidebar
+        dashboard: "Dashboard",
+        clients: "Clients",
+        obligations: "Obligations",
+        activity: "Activity",
+        reports: "Reports",
+        settings: "Settings",
+        // Status
+        pending: "Pending",
+        submitted: "Submitted",
+        under_review: "Under Review",
+        approved: "Approved",
+        overdue: "Overdue",
+        at_risk: "At Risk",
+        completed: "Completed",
+        // Dashboard
+        total_obligations: "Total Obligations",
+        view_recommendations: "View recommendations",
+        openclaw_insight: "OpenClaw Insight",
+        // Actions
+        mark_as_submitted: "Mark as Submitted",
+        approve: "Approve",
+        request_changes: "Request Changes",
+        sign_in: "Sign in",
+        email: "Email",
+        password: "Password",
+        welcome_back: "Welcome back",
+        enter_credentials: "Enter your credentials to access your account",
+        // General
+        search: "Search...",
+        theme: "Theme",
+        language: "Language",
+        profile: "Profile",
+        workspace: "Workspace",
+        logout: "Log out"
+    },
+    pt: {
+        // Sidebar
+        dashboard: "Painel",
+        clients: "Clientes",
+        obligations: "Obrigações",
+        activity: "Atividade",
+        reports: "Relatórios",
+        settings: "Configurações",
+        // Status
+        pending: "Pendente",
+        submitted: "Enviado",
+        under_review: "Em Análise",
+        approved: "Aprovado",
+        overdue: "Atrasado",
+        at_risk: "Em Risco",
+        completed: "Concluído",
+        // Dashboard
+        total_obligations: "Total de Obrigações",
+        view_recommendations: "Ver recomendações",
+        openclaw_insight: "Insight OpenClaw",
+        // Actions
+        mark_as_submitted: "Marcar como Enviado",
+        approve: "Aprovar",
+        request_changes: "Solicitar Alterações",
+        sign_in: "Entrar",
+        email: "E-mail",
+        password: "Senha",
+        welcome_back: "Bem-vindo de volta",
+        enter_credentials: "Insira suas credenciais para acessar sua conta",
+        // General
+        search: "Buscar...",
+        theme: "Tema",
+        language: "Idioma",
+        profile: "Perfil",
+        workspace: "Espaço de Trabalho",
+        logout: "Sair"
+    }
+};
+function I18nProvider({ children }) {
+    const [language, setLanguageState] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("pt");
+    const [mounted, setMounted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        const saved = localStorage.getItem("language");
+        if (saved && (saved === "en" || saved === "pt")) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setLanguageState(saved);
+        }
+        setMounted(true);
+    }, []);
+    const setLanguage = (lang)=>{
+        setLanguageState(lang);
+        localStorage.setItem("language", lang);
+    };
+    const t = (key)=>{
+        return translations[language][key] || key;
+    };
+    if (!mounted) {
+        return null;
+    }
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(I18nContext.Provider, {
+        value: {
+            language,
+            setLanguage,
+            t
+        },
+        children: children
+    }, void 0, false, {
+        fileName: "[project]/lib/i18n.tsx",
+        lineNumber: 127,
+        columnNumber: 5
+    }, this);
+}
+function useI18n() {
+    const context = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useContext"])(I18nContext);
+    if (context === undefined) {
+        throw new Error("useI18n must be used within an I18nProvider");
+    }
+    return context;
+}
+}),
+"[project]/lib/data.ts [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "mockActivities",
+    ()=>mockActivities,
+    "mockClients",
+    ()=>mockClients,
+    "mockObligations",
+    ()=>mockObligations,
+    "mockUsers",
+    ()=>mockUsers
+]);
+const mockUsers = [
+    {
+        id: "u1",
+        name: "Alex Silva",
+        email: "alex@obliga.com",
+        avatar: "https://i.pravatar.cc/150?u=u1",
+        role: "ADMIN"
+    },
+    {
+        id: "u2",
+        name: "Beatriz Costa",
+        email: "bia@obliga.com",
+        avatar: "https://i.pravatar.cc/150?u=u2",
+        role: "CLIENT"
+    }
+];
+const mockClients = [
+    {
+        id: "c1",
+        name: "TechSolutions Ltda",
+        email: "contact@techsolutions.com",
+        logo: "TS",
+        status: "Active"
+    },
+    {
+        id: "c2",
+        name: "Global Ventures",
+        email: "info@globalventures.com",
+        logo: "GV",
+        status: "Active"
+    },
+    {
+        id: "c3",
+        name: "Padaria do João",
+        email: "joao@padaria.com",
+        logo: "PJ",
+        status: "Active"
+    }
+];
+const mockObligations = [
+    {
+        id: "o1",
+        title: "Imposto de Renda Mensal",
+        client: "TechSolutions Ltda",
+        clientId: "c1",
+        type: "Payment",
+        dueDate: "2026-02-10",
+        status: "PENDING",
+        description: "Pagamento mensal do imposto de renda corporativo."
+    },
+    {
+        id: "o2",
+        title: "Relatório Financeiro Q1",
+        client: "Global Ventures",
+        clientId: "c2",
+        type: "Document",
+        dueDate: "2026-02-15",
+        status: "UNDER_REVIEW",
+        description: "Relatório consolidado do primeiro trimestre."
+    },
+    {
+        id: "o3",
+        title: "Alvará de Funcionamento",
+        client: "Padaria do João",
+        clientId: "c3",
+        type: "Approval",
+        dueDate: "2026-01-30",
+        status: "OVERDUE",
+        description: "Renovação do alvará anual."
+    },
+    {
+        id: "o4",
+        title: "Folha de Pagamento",
+        client: "TechSolutions Ltda",
+        clientId: "c1",
+        type: "Payment",
+        dueDate: "2026-02-05",
+        status: "APPROVED"
+    },
+    {
+        id: "o5",
+        title: "Contrato Social Atualizado",
+        client: "Global Ventures",
+        clientId: "c2",
+        type: "Document",
+        dueDate: "2026-02-20",
+        status: "CHANGES_REQUESTED",
+        description: "Pendente assinatura dos sócios."
+    },
+    {
+        id: "o6",
+        title: "DAS Simples Nacional",
+        client: "Padaria do João",
+        clientId: "c3",
+        type: "Payment",
+        dueDate: "2026-02-20",
+        status: "PENDING"
+    }
+];
+const mockActivities = [
+    {
+        id: "a1",
+        user: "Alex Silva",
+        userAvatar: "https://i.pravatar.cc/150?u=u1",
+        action: "approved",
+        target: "Folha de Pagamento",
+        timestamp: "2 hours ago",
+        type: "approve"
+    },
+    {
+        id: "a2",
+        user: "Beatriz Costa",
+        userAvatar: "https://i.pravatar.cc/150?u=u2",
+        action: "uploaded document for",
+        target: "Relatório Financeiro Q1",
+        timestamp: "5 hours ago",
+        type: "update"
+    },
+    {
+        id: "a3",
+        user: "System",
+        userAvatar: "",
+        action: "flagged as overdue",
+        target: "Alvará de Funcionamento",
+        timestamp: "1 day ago",
+        type: "update"
+    }
+];
+}),
+"[project]/lib/store-context.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "StoreProvider",
+    ()=>StoreProvider,
+    "useStore",
+    ()=>useStore
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$data$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/lib/data.ts [app-ssr] (ecmascript)");
+"use client";
+;
+;
+;
+const StoreContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createContext"])(undefined);
+function StoreProvider({ children }) {
+    const [role, setRoleState] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("CLIENT");
+    const [obligations, setObligations] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$data$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["mockObligations"]);
+    const [clients, setClients] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$data$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["mockClients"]);
+    const [activities, setActivities] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$data$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["mockActivities"]);
+    const [isInitialized, setIsInitialized] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    // Load role from localStorage
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        const savedRole = localStorage.getItem("obliga-role");
+        if (savedRole && (savedRole === "CLIENT" || savedRole === "ADMIN")) {
+            setRoleState(savedRole);
+        }
+        setIsInitialized(true);
+    }, []);
+    // Save role to localStorage
+    const setRole = (newRole)=>{
+        setRoleState(newRole);
+        localStorage.setItem("obliga-role", newRole);
+    };
+    // Check for overdue obligations on mount
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        if (!isInitialized) return;
+        const today = new Date().toISOString().split("T")[0];
+        setObligations((prev)=>prev.map((obl)=>{
+                if (obl.dueDate < today && obl.status !== "APPROVED" && obl.status !== "SUBMITTED" && obl.status !== "UNDER_REVIEW") {
+                    // Logic: If due date passed and not approved/submitted/under review?
+                    // Prompt says: "OVERDUE is computed automatically if dueDate < today and status is not APPROVED"
+                    // Typically if it's submitted, it's not overdue in terms of "client action needed" but might be "late submission".
+                    // However, prompt says "if dueDate < today and status is not APPROVED".
+                    // Let's stick to strict prompt: status is not APPROVED -> OVERDUE.
+                    // But if I just submitted it today (and it was due yesterday), does it become overdue?
+                    // Maybe we should only mark as overdue if it's PENDING or CHANGES_REQUESTED.
+                    // If it is SUBMITTED or UNDER_REVIEW, the client has done their part.
+                    // Prompt says "OVERDUE is computed automatically if dueDate < today and status is not APPROVED".
+                    // This implies even SUBMITTED could be OVERDUE? That's harsh. 
+                    // Usually "Overdue" means "Action not taken by due date".
+                    // I will assume PENDING or CHANGES_REQUESTED -> OVERDUE.
+                    if (obl.status === "PENDING" || obl.status === "CHANGES_REQUESTED") {
+                        return {
+                            ...obl,
+                            status: "OVERDUE"
+                        };
+                    }
+                }
+                return obl;
+            }));
+    }, [
+        isInitialized
+    ]);
+    const updateObligationStatus = (id, status)=>{
+        setObligations((prev)=>prev.map((o)=>o.id === id ? {
+                    ...o,
+                    status
+                } : o));
+        // Add activity log
+        const obl = obligations.find((o)=>o.id === id);
+        if (obl) {
+            const newActivity = {
+                id: `act-${Date.now()}`,
+                user: role === "ADMIN" ? "Alex Silva" : "Beatriz Costa",
+                userAvatar: role === "ADMIN" ? "https://i.pravatar.cc/150?u=u1" : "https://i.pravatar.cc/150?u=u2",
+                action: `changed status to ${status}`,
+                target: obl.title,
+                timestamp: "Just now",
+                type: "update"
+            };
+            setActivities((prev)=>[
+                    newActivity,
+                    ...prev
+                ]);
+        }
+    };
+    const addClient = (client)=>{
+        setClients((prev)=>[
+                ...prev,
+                client
+            ]);
+    };
+    const addActivity = (activity)=>{
+        setActivities((prev)=>[
+                activity,
+                ...prev
+            ]);
+    };
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(StoreContext.Provider, {
+        value: {
+            role,
+            setRole,
+            obligations,
+            clients,
+            activities,
+            updateObligationStatus,
+            addClient,
+            addActivity
+        },
+        children: children
+    }, void 0, false, {
+        fileName: "[project]/lib/store-context.tsx",
+        lineNumber: 107,
+        columnNumber: 5
+    }, this);
+}
+function useStore() {
+    const context = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useContext"])(StoreContext);
+    if (context === undefined) {
+        throw new Error("useStore must be used within a StoreProvider");
+    }
+    return context;
+}
+}),
+"[project]/node_modules/next/dist/server/route-modules/app-page/module.compiled.js [app-ssr] (ecmascript)", ((__turbopack_context__, module, exports) => {
+"use strict";
+
+if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+;
+else {
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
+    else {
+        if ("TURBOPACK compile-time truthy", 1) {
+            if ("TURBOPACK compile-time truthy", 1) {
+                module.exports = __turbopack_context__.r("[externals]/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js [external] (next/dist/compiled/next-server/app-page-turbo.runtime.dev.js, cjs)");
+            } else //TURBOPACK unreachable
+            ;
+        } else //TURBOPACK unreachable
+        ;
+    }
+} //# sourceMappingURL=module.compiled.js.map
+}),
+"[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)", ((__turbopack_context__, module, exports) => {
+"use strict";
+
+module.exports = __turbopack_context__.r("[project]/node_modules/next/dist/server/route-modules/app-page/module.compiled.js [app-ssr] (ecmascript)").vendored['react-ssr'].ReactJsxDevRuntime; //# sourceMappingURL=react-jsx-dev-runtime.js.map
+}),
+"[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)", ((__turbopack_context__, module, exports) => {
+"use strict";
+
+module.exports = __turbopack_context__.r("[project]/node_modules/next/dist/server/route-modules/app-page/module.compiled.js [app-ssr] (ecmascript)").vendored['react-ssr'].React; //# sourceMappingURL=react.js.map
+}),
+"[project]/node_modules/next-themes/dist/index.mjs [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "ThemeProvider",
+    ()=>J,
+    "useTheme",
+    ()=>z
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
+"use client";
+;
+var M = (e, i, s, u, m, a, l, h)=>{
+    let d = document.documentElement, w = [
+        "light",
+        "dark"
+    ];
+    function p(n) {
+        (Array.isArray(e) ? e : [
+            e
+        ]).forEach((y)=>{
+            let k = y === "class", S = k && a ? m.map((f)=>a[f] || f) : m;
+            k ? (d.classList.remove(...S), d.classList.add(a && a[n] ? a[n] : n)) : d.setAttribute(y, n);
+        }), R(n);
+    }
+    function R(n) {
+        h && w.includes(n) && (d.style.colorScheme = n);
+    }
+    function c() {
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    if (u) p(u);
+    else try {
+        let n = localStorage.getItem(i) || s, y = l && n === "system" ? c() : n;
+        p(y);
+    } catch (n) {}
+};
+var b = [
+    "light",
+    "dark"
+], I = "(prefers-color-scheme: dark)", O = ("TURBOPACK compile-time value", "undefined") == "undefined", x = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createContext"](void 0), U = {
+    setTheme: (e)=>{},
+    themes: []
+}, z = ()=>{
+    var e;
+    return (e = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useContext"](x)) != null ? e : U;
+}, J = (e)=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useContext"](x) ? __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createElement"](__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], null, e.children) : __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createElement"](V, {
+        ...e
+    }), N = [
+    "light",
+    "dark"
+], V = ({ forcedTheme: e, disableTransitionOnChange: i = !1, enableSystem: s = !0, enableColorScheme: u = !0, storageKey: m = "theme", themes: a = N, defaultTheme: l = s ? "system" : "light", attribute: h = "data-theme", value: d, children: w, nonce: p, scriptProps: R })=>{
+    let [c, n] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"](()=>H(m, l)), [T, y] = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"](()=>c === "system" ? E() : c), k = d ? Object.values(d) : a, S = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"]((o)=>{
+        let r = o;
+        if (!r) return;
+        o === "system" && s && (r = E());
+        let v = d ? d[r] : r, C = i ? W(p) : null, P = document.documentElement, L = (g)=>{
+            g === "class" ? (P.classList.remove(...k), v && P.classList.add(v)) : g.startsWith("data-") && (v ? P.setAttribute(g, v) : P.removeAttribute(g));
+        };
+        if (Array.isArray(h) ? h.forEach(L) : L(h), u) {
+            let g = b.includes(l) ? l : null, D = b.includes(r) ? r : g;
+            P.style.colorScheme = D;
+        }
+        C == null || C();
+    }, [
+        p
+    ]), f = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"]((o)=>{
+        let r = typeof o == "function" ? o(c) : o;
+        n(r);
+        try {
+            localStorage.setItem(m, r);
+        } catch (v) {}
+    }, [
+        c
+    ]), A = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"]((o)=>{
+        let r = E(o);
+        y(r), c === "system" && s && !e && S("system");
+    }, [
+        c,
+        e
+    ]);
+    __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"](()=>{
+        let o = window.matchMedia(I);
+        return o.addListener(A), A(o), ()=>o.removeListener(A);
+    }, [
+        A
+    ]), __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"](()=>{
+        let o = (r)=>{
+            r.key === m && (r.newValue ? n(r.newValue) : f(l));
+        };
+        return window.addEventListener("storage", o), ()=>window.removeEventListener("storage", o);
+    }, [
+        f
+    ]), __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"](()=>{
+        S(e != null ? e : c);
+    }, [
+        e,
+        c
+    ]);
+    let Q = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useMemo"](()=>({
+            theme: c,
+            setTheme: f,
+            forcedTheme: e,
+            resolvedTheme: c === "system" ? T : c,
+            themes: s ? [
+                ...a,
+                "system"
+            ] : a,
+            systemTheme: s ? T : void 0
+        }), [
+        c,
+        f,
+        e,
+        T,
+        s,
+        a
+    ]);
+    return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createElement"](x.Provider, {
+        value: Q
+    }, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createElement"](_, {
+        forcedTheme: e,
+        storageKey: m,
+        attribute: h,
+        enableSystem: s,
+        enableColorScheme: u,
+        defaultTheme: l,
+        value: d,
+        themes: a,
+        nonce: p,
+        scriptProps: R
+    }), w);
+}, _ = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["memo"](({ forcedTheme: e, storageKey: i, attribute: s, enableSystem: u, enableColorScheme: m, defaultTheme: a, value: l, themes: h, nonce: d, scriptProps: w })=>{
+    let p = JSON.stringify([
+        s,
+        i,
+        a,
+        e,
+        h,
+        l,
+        u,
+        m
+    ]).slice(1, -1);
+    return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createElement"]("script", {
+        ...w,
+        suppressHydrationWarning: !0,
+        nonce: ("TURBOPACK compile-time truthy", 1) ? d : "TURBOPACK unreachable",
+        dangerouslySetInnerHTML: {
+            __html: `(${M.toString()})(${p})`
+        }
+    });
+}), H = (e, i)=>{
+    if ("TURBOPACK compile-time truthy", 1) return;
+    //TURBOPACK unreachable
+    ;
+    let s;
+}, W = (e)=>{
+    let i = document.createElement("style");
+    return e && i.setAttribute("nonce", e), i.appendChild(document.createTextNode("*,*::before,*::after{-webkit-transition:none!important;-moz-transition:none!important;-o-transition:none!important;-ms-transition:none!important;transition:none!important}")), document.head.appendChild(i), ()=>{
+        window.getComputedStyle(document.body), setTimeout(()=>{
+            document.head.removeChild(i);
+        }, 1);
+    };
+}, E = (e)=>(e || (e = window.matchMedia(I)), e.matches ? "dark" : "light");
+;
+}),
+];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__7edaccc9._.js.map

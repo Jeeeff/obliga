@@ -1,0 +1,9 @@
+{
+  "/(protected)/activity/page": "app/(protected)/activity/page.js",
+  "/(protected)/clients/page": "app/(protected)/clients/page.js",
+  "/(protected)/dashboard/page": "app/(protected)/dashboard/page.js",
+  "/(protected)/obligations/page": "app/(protected)/obligations/page.js",
+  "/(protected)/settings/page": "app/(protected)/settings/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js"
+}

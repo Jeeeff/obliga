@@ -1,0 +1,13 @@
+{
+  "/(protected)/activity/page": "/activity",
+  "/(protected)/clients/page": "/clients",
+  "/(protected)/dashboard/page": "/dashboard",
+  "/(protected)/obligations/[id]/page": "/obligations/[id]",
+  "/(protected)/obligations/page": "/obligations",
+  "/(protected)/settings/page": "/settings",
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/favicon.ico/route": "/favicon.ico",
+  "/login/page": "/login",
+  "/page": "/"
+}
