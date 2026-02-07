@@ -1,0 +1,12 @@
+node_modules/
+.git/
+.env
+# .next/  <-- Mantido para upload (Build Frontend)
+# dist/   <-- Mantido para upload (Build Backend)
+uploads/
+test-results/
+reports/
+*.log
+.DS_Store
+thumbs.db
+coverage/

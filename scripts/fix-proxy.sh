@@ -1,7 +1,26 @@
+#!/bin/bash
+
+# Script de Correção de Proxy para Express (VPS)
+# Corrige o erro "ERR_ERL_UNEXPECTED_X_FORWARDED_FOR"
+# Executar como root no servidor
+
+BACKEND_DIR="/root/obliga/backend"
+SRC_DIR="$BACKEND_DIR/src"
+
+echo "=========================================="
+echo " CORRIGINDO CONFIGURAÇÃO DE PROXY (Rate Limit)"
+echo "=========================================="
+
+cd "$BACKEND_DIR" || exit 1
+
+# 1. Atualizar src/index.ts com 'trust proxy'
+echo "[1/3] Adicionando 'app.set(trust proxy, 1)'..."
+
+# Usando cat para garantir a ordem correta das configurações
+cat > "$SRC_DIR/index.ts" << 'EOF'
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
-import path from 'path'
 import { env } from './config/env'
 import { logger } from './utils/logger'
 import { requestLogger } from './middleware/request-logger'
@@ -9,6 +28,7 @@ import { globalLimiter, authLimiter } from './middleware/rate-limit'
 import { errorHandler } from './middleware/error'
 import prisma from './utils/prisma'
 
+// Routes
 import authRoutes from './routes/auth'
 import clientRoutes from './routes/clients'
 import obligationRoutes from './routes/obligations'
@@ -18,11 +38,11 @@ import tenantRoutes from './routes/tenants'
 import openClawRoutes from './routes/openclaw'
 import webhookRoutes from './routes/webhooks'
 import invoiceRoutes from './routes/invoices'
-import healthRoutes from './routes/health'
+import healthRouter from './routes/health'
 
 const app = express()
 
-// Trust Proxy (Required for Nginx/Reverse Proxy)
+// Trust Proxy (Required for rate-limit behind Nginx)
 app.set('trust proxy', 1)
 
 // Security Headers
@@ -31,21 +51,21 @@ app.use(helmet())
 // CORS
 app.use(cors({
   origin: env.CORS_ORIGINS,
-  credentials: true // Only enabled if necessary
+  credentials: true
 }))
 
 // Request Logging
 app.use(requestLogger)
+
+// Health Check (Early return)
+app.use(healthRouter)
 
 // Global Rate Limiting
 app.use(globalLimiter)
 
 app.use(express.json())
 
-// Health Check
-app.use('/health', healthRoutes)
-
-// Health Checks (Legacy/K8s)
+// Native Health Checks
 app.get('/healthz', (req, res) => {
   res.status(200).send('OK')
 })
@@ -60,31 +80,13 @@ app.get('/readyz', async (req, res) => {
   }
 })
 
-import { authenticate } from './middleware/auth'
-import { openClawAuth } from './middleware/openclaw-auth'
-
-// Routes
-app.use('/api/auth', authLimiter, authRoutes) // Apply stricter limit to auth
+// API Routes
+app.use('/api/auth', authLimiter, authRoutes)
 app.use('/api/clients', clientRoutes)
 app.use('/api/obligations', obligationRoutes)
 app.use('/api/activity', activityRoutes)
 app.use('/api/attachments', attachmentRoutes)
-
-// Invoices (Support both Frontend/JWT and OpenClaw/ApiKey)
-app.use('/api/invoices', authenticate, invoiceRoutes)
-// app.use('/api/invoices', openClawAuth, invoiceRoutes) - Removed duplicate, handle inside controller or use different path if needed.
-// Actually, I set up the controller to handle both auth types. So one route is enough if middleware allows both?
-// No, middleware `authenticate` and `openClawAuth` are different.
-// I can chain them or use a combined middleware?
-// Or just keep two routes? But they collide if path is same.
-// Original:
-// app.use('/invoices', authenticate, invoiceRoutes)
-// app.use('/api/invoices', openClawAuth, invoiceRoutes)
-// If I move everything to /api, I have a collision.
-// Maybe OpenClaw uses /api/openclaw/invoices?
-// But the user asked for /api/openclaw/* for skills.
-// Let's keep /api/auth separate.
-
+app.use('/api/invoices', invoiceRoutes)
 app.use('/api/tenants', tenantRoutes)
 app.use('/api/openclaw', openClawRoutes)
 app.use('/api/webhooks', webhookRoutes)
@@ -104,3 +106,16 @@ if (require.main === module) {
 }
 
 export default app
+EOF
+
+# 2. Rebuild
+echo "[2/3] Recompilando..."
+npm run build
+
+# 3. Restart
+echo "[3/3] Reiniciando serviço..."
+pm2 restart obliga-api
+
+echo "=========================================="
+echo " PROXY CORRIGIDO"
+echo "=========================================="

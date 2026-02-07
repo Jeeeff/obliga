@@ -6,7 +6,6 @@ import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label" // Assuming Label exists or I'll use standard label
 import { Plus, Trash } from "lucide-react"
 
 interface Client {

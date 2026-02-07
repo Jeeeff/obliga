@@ -68,7 +68,7 @@ export default function ClientsPage() {
     try {
         await createClient({
             name: newClientName,
-            email: newClientEmail || undefined,
+            email: newClientEmail,
         })
         setNewClientName("")
         setNewClientEmail("")
@@ -203,10 +203,8 @@ export default function ClientsPage() {
                                 <select 
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                     value={newObligation.type}
-                                    onChange={(e) => setNewObligation({...newObligation, type: e.target.value})}
+                                    onChange={(e) => setNewObligation({...newObligation, type: e.target.value as any})}
                                 >
-                                    <option value="TAX">Tax</option>
-                                    <option value="LEGAL">Legal</option>
                                     <option value="PAYMENT">Payment</option>
                                     <option value="DOCUMENT">Document</option>
                                     <option value="APPROVAL">Approval</option>
