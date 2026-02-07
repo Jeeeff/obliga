@@ -2,27 +2,36 @@
 # ROOT
 # ==============================
 node_modules
+**/node_modules/
 .env*
 *.log
 
 # ==============================
-# FRONTEND (Next.js)
+# NEXT.JS (ANY LEVEL)
 # ==============================
-frontend/node_modules
-frontend/.next
-frontend/out
-frontend/build
-frontend/.env*
-frontend/*.tsbuildinfo
-frontend/next-env.d.ts
+.next
+.next/
+**/.next/
+out
+**/out/
+build
+**/build/
+*.tsbuildinfo
+next-env.d.ts
 
 # ==============================
-# BACKEND (Node/Express)
+# BACKEND (Node/Express/Prisma)
 # ==============================
-backend/node_modules
-backend/dist
-backend/.env*
+dist
+**/dist/
 backend/prisma/dev.db
+
+# ==============================
+# DATABASE FILES (IF SQLITE EVER USED)
+# ==============================
+*.db
+*.sqlite
+*.sqlite3
 
 # ==============================
 # GENERAL
@@ -30,3 +39,4 @@ backend/prisma/dev.db
 .DS_Store
 coverage
 .vercel
+Thumbs.db
