@@ -45,7 +45,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       email: userData.email,
       avatar: "https://github.com/shadcn.png", // Mock avatar for now
       role: userData.role,
-      workspaceName: userData.workspace?.name
+      tenantName: userData.tenant?.name,
+      tenantId: userData.tenantId
     })
     setRole(userData.role)
     return userData

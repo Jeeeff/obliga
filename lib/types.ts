@@ -20,7 +20,8 @@ export interface User {
   email: string
   avatar?: string
   role: Role
-  workspaceName?: string
+  tenantName?: string
+  tenantId?: string
   clientId?: string
 }
 

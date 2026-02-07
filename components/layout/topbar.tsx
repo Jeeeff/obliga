@@ -27,7 +27,7 @@ export function Topbar() {
     <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-16 flex items-center px-4 gap-4 sticky top-0 z-50">
       <div className="hidden md:flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-md">
         <div className="h-4 w-4 rounded-full bg-primary/20 border border-primary/50" />
-        <span className="text-sm font-medium">{user?.workspaceName || "Workspace"}</span>
+        <span className="text-sm font-medium">{user?.tenantName || "Workspace"}</span>
       </div>
 
       <div className="flex-1 ml-4 relative hidden md:block max-w-md">

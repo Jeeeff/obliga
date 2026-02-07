@@ -6,7 +6,7 @@ const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   (process.env.NODE_ENV === "production"
     ? "https://api.obliga.devlogicstudio.cloud"
-    : "http://localhost:3001")
+    : "http://localhost:3001/api")
 
 export class ApiError extends Error {
   status: number

@@ -90,7 +90,7 @@ export function Sidebar() {
       </div>
       <div className="px-3 py-2 border-t">
         <div className="bg-muted/50 rounded-lg p-3 text-center">
-            <p className="text-sm font-medium truncate">{user?.workspaceName || "Obliga"}</p>
+            <p className="text-sm font-medium truncate">{user?.tenantName || "Obliga"}</p>
             <p className="text-xs text-muted-foreground">v0.1.0</p>
         </div>
       </div>

@@ -2,9 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { motion } from "framer-motion"
-import { Hexagon, AlertCircle } from "lucide-react"
+import { Hexagon, AlertCircle, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,29 +11,43 @@ import { useI18n } from "@/lib/i18n"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
 import { api } from "@/lib/api"
+import Link from "next/link"
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter()
   const { t } = useI18n()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState(false)
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
 
     const formData = new FormData(e.currentTarget as HTMLFormElement)
+    const name = formData.get("name") as string
     const email = formData.get("email") as string
     const password = formData.get("password") as string
+    const tenantName = formData.get("tenantName") as string
 
     try {
-      const data = await api.post("/auth/login", { email, password })
-      localStorage.setItem("accessToken", data.accessToken)
-      // localStorage.setItem("refreshToken", data.refreshToken) // Removed for security
-      router.push("/dashboard")
+      await api.request("/tenants/register", {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          tenantName,
+          role: "ADMIN"
+        })
+      })
+      setSuccess(true)
+      setTimeout(() => {
+        router.push("/login")
+      }, 2000)
     } catch (err: any) {
-      setError(err.message || "Login failed")
+      setError(err.message || "Registration failed")
     } finally {
       setLoading(false)
     }
@@ -61,10 +74,10 @@ export default function LoginPage() {
             <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-2">
               <Hexagon className="h-10 w-10 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-bold">DevLogic Obliga</CardTitle>
-            <CardDescription>{t("enter_credentials")}</CardDescription>
+            <CardTitle className="text-2xl font-bold">Criar Nova Conta</CardTitle>
+            <CardDescription>Registre sua empresa no Obliga</CardDescription>
           </CardHeader>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleRegister}>
             <CardContent className="space-y-4">
               {error && (
                 <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md flex items-center gap-2">
@@ -72,31 +85,49 @@ export default function LoginPage() {
                   {error}
                 </div>
               )}
+              {success && (
+                <div className="bg-green-500/15 text-green-600 text-sm p-3 rounded-md flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Conta criada com sucesso! Redirecionando...
+                </div>
+              )}
               <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email">
-                  {t("email")}
+                <label className="text-sm font-medium leading-none" htmlFor="tenantName">
+                  Nome da Empresa
                 </label>
-                <Input id="email" name="email" type="email" placeholder="user@obliga.com" required />
+                <Input id="tenantName" name="tenantName" placeholder="Minha Empresa Ltda" required />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="password">
+                <label className="text-sm font-medium leading-none" htmlFor="name">
+                  Seu Nome
+                </label>
+                <Input id="name" name="name" placeholder="João Silva" required />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none" htmlFor="email">
+                  {t("email")}
+                </label>
+                <Input id="email" name="email" type="email" placeholder="admin@empresa.com" required />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none" htmlFor="password">
                   {t("password")}
                 </label>
                 <Input id="password" name="password" type="password" required />
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
-              <Button type="submit" className="w-full" disabled={loading} variant="glow">
+              <Button type="submit" className="w-full" disabled={loading || success} variant="glow">
                 {loading ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                 ) : (
-                  t("sign_in")
+                  "Registrar"
                 )}
               </Button>
               <div className="text-center text-sm text-muted-foreground">
-                Não tem uma conta?{" "}
-                <Link href="/register" className="text-primary hover:underline">
-                  Registrar Empresa
+                Já tem uma conta?{" "}
+                <Link href="/login" className="text-primary hover:underline">
+                  Fazer Login
                 </Link>
               </div>
             </CardFooter>

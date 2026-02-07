@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: obliga
+          POSTGRES_PASSWORD: obliga123
+          POSTGRES_DB: obliga_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install Dependencies
+      working-directory: ./backend
+      run: npm ci
+
+    - name: Setup Database
+      working-directory: ./backend
+      env:
+        DATABASE_URL: postgres://obliga:obliga123@localhost:5432/obliga_test?schema=public
+        JWT_SECRET: test-secret
+        JWT_ACCESS_SECRET: test-access
+        JWT_REFRESH_SECRET: test-refresh
+      run: |
+        npx prisma generate
+        npx prisma migrate deploy
+
+    - name: Run Tests
+      working-directory: ./backend
+      env:
+        DATABASE_URL: postgres://obliga:obliga123@localhost:5432/obliga_test?schema=public
+        JWT_SECRET: test-secret
+      run: npm test
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install Dependencies
+      run: npm ci
+      
+    - name: Build
+      run: npm run build
+      env:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:3001/api

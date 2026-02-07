@@ -37,7 +37,10 @@ export default function InvoiceDetailsPage() {
     try {
         // Direct download via browser logic or API blob
         const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'}/invoices/${invoice.id}/pdf`, {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 
+            (process.env.NODE_ENV === "production" ? "https://api.obliga.devlogicstudio.cloud" : "http://localhost:3001/api");
+            
+        const response = await fetch(`${baseUrl}/invoices/${invoice.id}/pdf`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
