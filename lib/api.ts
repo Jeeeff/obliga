@@ -47,7 +47,12 @@ export const api = {
 
     // Normalize headers (options.headers can be Headers | object | array)
     const headers = new Headers(options.headers)
-    headers.set("Content-Type", "application/json")
+    
+    // Only set Content-Type to JSON if body is not FormData
+    if (!(options.body instanceof FormData)) {
+        headers.set("Content-Type", "application/json")
+    }
+    
     headers.set("Accept", "application/json")
 
     if (token) {
@@ -97,9 +102,10 @@ export const api = {
   },
 
   post(endpoint: string, body: any) {
+    const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
     return this.request(endpoint, {
       method: "POST",
-      body: JSON.stringify(body),
+      body: isFormData ? body : JSON.stringify(body),
     })
   },
 

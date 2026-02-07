@@ -4,6 +4,7 @@ import prisma from '../utils/prisma'
 import { generateTokens, verifyRefreshToken } from '../utils/jwt'
 import { z } from 'zod'
 import { AuthRequest } from '../middleware/auth'
+import { env } from '../config/env'
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -17,6 +18,14 @@ const registerSchema = z.object({
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    // Security Check: Disable register in production unless bootstrap key is provided
+    if (env.NODE_ENV === 'production') {
+        const bootstrapKey = req.headers['x-admin-bootstrap-key']
+        if (!env.ADMIN_BOOTSTRAP_KEY || bootstrapKey !== env.ADMIN_BOOTSTRAP_KEY) {
+            return res.status(403).json({ error: 'Registration is disabled in production' })
+        }
+    }
+
     const { name, email, password, role, workspaceName, workspaceId, clientId } = registerSchema.parse(req.body)
 
     // Check if user exists
@@ -100,9 +109,9 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
     const { refreshToken } = req.body
     if (!refreshToken) return res.status(400).json({ error: 'Refresh token required' })
 
-    const decoded = verifyRefreshToken(refreshToken)
-    const user = await prisma.user.findUnique({ where: { id: decoded.userId } })
-
+    const payload = verifyRefreshToken(refreshToken)
+    
+    const user = await prisma.user.findUnique({ where: { id: payload.userId } })
     if (!user) return res.status(401).json({ error: 'User not found' })
 
     const tokens = generateTokens(user)
@@ -113,20 +122,18 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
 }
 
 export const me = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.user?.userId
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' })
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: req.user?.userId },
+            include: { workspace: true, client: true }
+        })
+        
+        if (!user) return res.status(404).json({ error: 'User not found' })
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { workspace: true, client: true }
-    })
-
-    if (!user) return res.status(404).json({ error: 'User not found' })
-
-    const { passwordHash, ...userWithoutPassword } = user
-    res.json(userWithoutPassword)
-  } catch (error) {
-    next(error)
-  }
+        // Remove sensitive data
+        const { passwordHash, ...userData } = user
+        res.json(userData)
+    } catch (error) {
+        next(error)
+    }
 }

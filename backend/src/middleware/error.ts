@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { ZodError } from 'zod'
+import { logger } from '../utils/logger'
+import { env } from '../config/env'
 
 export const errorHandler = (
   err: any,
@@ -7,23 +9,40 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error(err)
+  const requestId = req.id
+  
+  // Log the error
+  logger.error({ 
+    err, 
+    requestId,
+    method: req.method,
+    path: req.path
+  }, 'Request failed')
 
   if (err instanceof ZodError) {
     return res.status(400).json({
       error: 'Validation Error',
       details: err.errors,
+      requestId
     })
   }
 
-  if (err.name === 'UnauthorizedError') {
-      return res.status(401).json({ error: 'Unauthorized' })
+  if (err.name === 'UnauthorizedError' || err.message === 'Unauthorized') {
+      return res.status(401).json({ error: 'Unauthorized', requestId })
   }
 
   const statusCode = err.statusCode || 500
   const message = err.message || 'Internal Server Error'
 
-  res.status(statusCode).json({
+  // Don't leak stack traces in production
+  const response: any = {
     error: message,
-  })
+    requestId
+  }
+
+  if (env.NODE_ENV !== 'production') {
+    response.stack = err.stack
+  }
+
+  res.status(statusCode).json(response)
 }

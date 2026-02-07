@@ -75,13 +75,13 @@ export default function LoginPage() {
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email">
                   {t("email")}
                 </label>
-                <Input id="email" name="email" type="email" placeholder="user@obliga.com" required defaultValue="admin@obliga.com" />
+                <Input id="email" name="email" type="email" placeholder="user@obliga.com" required />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="password">
                   {t("password")}
                 </label>
-                <Input id="password" name="password" type="password" required defaultValue="password123" />
+                <Input id="password" name="password" type="password" required />
               </div>
             </CardContent>
             <CardFooter>

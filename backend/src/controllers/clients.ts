@@ -1,7 +1,9 @@
 import { Response, NextFunction } from 'express'
-import prisma from '../utils/prisma'
 import { AuthRequest } from '../middleware/auth'
 import { z } from 'zod'
+import { clientService } from '../services/client.service'
+import { env } from '../config/env'
+import { OpenClawContext } from '../integrations/openclaw'
 
 const clientSchema = z.object({
   name: z.string().min(1),
@@ -24,14 +26,21 @@ function getParamId(req: AuthRequest): string {
   return String(id)
 }
 
+const getContext = (req: AuthRequest): OpenClawContext => ({
+    requestId: (req as any).id || 'unknown',
+    actorUserId: req.user!.userId,
+    workspaceId: req.user!.workspaceId,
+    featureFlags: {
+        OPENCLAW_ENABLED: env.OPENCLAW_ENABLED
+    }
+})
+
 export const listClients = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const workspaceId = getWorkspaceId(req)
+    const { role, clientId } = req.user!
 
-    const clients = await prisma.client.findMany({
-      where: { workspaceId },
-      orderBy: { createdAt: 'desc' }
-    })
+    const clients = await clientService.list(workspaceId, role, clientId || undefined)
 
     res.json(clients)
   } catch (error) {
@@ -41,27 +50,16 @@ export const listClients = async (req: AuthRequest, res: Response, next: NextFun
 
 export const createClient = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    // Only ADMIN can create clients
+    if (req.user?.role !== 'ADMIN') {
+        return res.status(403).json({ error: 'Only admins can create clients' })
+    }
+
     const workspaceId = getWorkspaceId(req)
     const data = clientSchema.parse(req.body)
+    const context = getContext(req)
 
-    const client = await prisma.client.create({
-      data: {
-        ...data,
-        workspaceId
-      }
-    })
-
-    // Log activity
-    await prisma.activityLog.create({
-      data: {
-        workspaceId,
-        actorUserId: req.user!.userId,
-        entityType: 'CLIENT',
-        entityId: client.id,
-        action: 'CREATED',
-        meta: { name: client.name }
-      }
-    })
+    const client = await clientService.create(workspaceId, req.user!.userId, data, context)
 
     res.status(201).json(client)
   } catch (error) {
@@ -73,10 +71,34 @@ export const getClient = async (req: AuthRequest, res: Response, next: NextFunct
   try {
     const workspaceId = getWorkspaceId(req)
     const id = getParamId(req)
+    const { role, clientId } = req.user!
 
-    const client = await prisma.client.findFirst({
-      where: { id, workspaceId }
-    })
+    const client = await clientService.get(workspaceId, id, role, clientId || undefined)
+
+    if (!client) return res.status(404).json({ error: 'Client not found' })
+
+    res.json(client)
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Access denied') {
+        return res.status(403).json({ error: 'Access denied' })
+    }
+    next(error)
+  }
+}
+
+export const updateClient = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    // Only ADMIN can update clients
+    if (req.user?.role !== 'ADMIN') {
+        return res.status(403).json({ error: 'Only admins can update clients' })
+    }
+
+    const workspaceId = getWorkspaceId(req)
+    const id = getParamId(req)
+    const data = clientSchema.partial().parse(req.body)
+    const context = getContext(req)
+
+    const client = await clientService.update(workspaceId, id, data, context)
 
     if (!client) return res.status(404).json({ error: 'Client not found' })
 
@@ -86,36 +108,18 @@ export const getClient = async (req: AuthRequest, res: Response, next: NextFunct
   }
 }
 
-export const updateClient = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const workspaceId = getWorkspaceId(req)
-    const id = getParamId(req)
-    const data = clientSchema.partial().parse(req.body)
-
-    const result = await prisma.client.updateMany({
-      where: { id, workspaceId },
-      data
-    })
-
-    if (result.count === 0) return res.status(404).json({ error: 'Client not found' })
-
-    const client = await prisma.client.findFirst({ where: { id, workspaceId } })
-    res.json(client)
-  } catch (error) {
-    next(error)
-  }
-}
-
 export const deleteClient = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    if (req.user?.role !== 'ADMIN') {
+        return res.status(403).json({ error: 'Only admins can delete clients' })
+    }
+
     const workspaceId = getWorkspaceId(req)
     const id = getParamId(req)
 
-    const result = await prisma.client.deleteMany({
-      where: { id, workspaceId }
-    })
+    const success = await clientService.delete(workspaceId, id)
 
-    if (result.count === 0) return res.status(404).json({ error: 'Client not found' })
+    if (!success) return res.status(404).json({ error: 'Client not found' })
 
     res.status(204).send()
   } catch (error) {

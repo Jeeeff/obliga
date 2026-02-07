@@ -11,6 +11,7 @@ import {
     addComment,
     getComments
 } from '../controllers/obligations'
+import { uploadMiddleware, uploadAttachment, listAttachments } from '../controllers/attachments'
 import { authenticate, requireRole } from '../middleware/auth'
 
 const router = Router()
@@ -31,5 +32,9 @@ router.post('/:id/reset', requireRole(['ADMIN']), resetObligation)
 // Comments
 router.get('/:id/comments', getComments)
 router.post('/:id/comments', addComment)
+
+// Attachments
+router.post('/:id/attachments', uploadMiddleware, uploadAttachment)
+router.get('/:id/attachments', listAttachments)
 
 export default router

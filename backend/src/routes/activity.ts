@@ -1,11 +1,11 @@
 import { Router } from 'express'
 import { listActivity } from '../controllers/activity'
-import { authenticate } from '../middleware/auth'
+import { authenticate, requireRole } from '../middleware/auth'
 
 const router = Router()
 
 router.use(authenticate)
 
-router.get('/', listActivity)
+router.get('/', requireRole(['ADMIN']), listActivity)
 
 export default router

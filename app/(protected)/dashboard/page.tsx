@@ -141,9 +141,9 @@ export default function DashboardPage() {
                         <div className={cn("h-10 w-10 rounded-full flex items-center justify-center bg-primary/10 group-hover:bg-primary/20 transition", 
                             item.status === "OVERDUE" ? "bg-red-100 text-red-600" : 
                             item.status === "APPROVED" ? "bg-green-100 text-green-600" : "text-primary")}>
-                            {item.type === "Payment" && <span className="font-bold">$</span>}
-                            {item.type === "Document" && <FileText className="h-5 w-5" />}
-                            {item.type === "Approval" && <CheckCircle2 className="h-5 w-5" />}
+                            {item.type === "PAYMENT" && <span className="font-bold">$</span>}
+                            {item.type === "DOCUMENT" && <FileText className="h-5 w-5" />}
+                            {item.type === "APPROVAL" && <CheckCircle2 className="h-5 w-5" />}
                         </div>
                         <div>
                         <p className="font-medium">{item.title}</p>

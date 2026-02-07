@@ -11,33 +11,89 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useStore } from "@/lib/store-context"
 import { useI18n } from "@/lib/i18n"
 
+import { api } from "@/lib/api"
+
 export default function ClientsPage() {
   const { t } = useI18n()
-  const { clients, loading, addClient } = useStore()
+  const { clients, loading, createClient, role } = useStore()
   const [showAddModal, setShowAddModal] = useState(false)
   const [newClientName, setNewClientName] = useState("")
+  const [newClientEmail, setNewClientEmail] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
-  const handleAddClient = (e: React.FormEvent) => {
+  // Obligation Modal State
+  const [showObligationModal, setShowObligationModal] = useState(false)
+  const [newObligation, setNewObligation] = useState<{
+    title: string
+    clientId: string
+    type: "PAYMENT" | "DOCUMENT" | "APPROVAL"
+    dueDate: string
+    description: string
+  }>({
+    title: "",
+    clientId: "",
+    type: "PAYMENT",
+    dueDate: "",
+    description: ""
+  })
+
+  const handleCreateObligation = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newObligation.title || !newObligation.clientId || !newObligation.dueDate) return
+
+    setSubmitting(true)
+    try {
+        await api.post("/obligations", newObligation)
+        // toast("Obligation created", "success") // Assumes toast is available or use console
+        setNewObligation({
+            title: "",
+            clientId: "",
+            type: "PAYMENT",
+            dueDate: "",
+            description: ""
+        })
+        setShowObligationModal(false)
+    } catch (error) {
+        console.error(error)
+    } finally {
+        setSubmitting(false)
+    }
+  }
+
+  const handleAddClient = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newClientName) return
-    addClient({
-        id: `c${Date.now()}`,
-        name: newClientName,
-        email: `${newClientName.toLowerCase().replace(" ", "")}@example.com`,
-        logo: newClientName.substring(0, 2).toUpperCase(),
-        status: "Active"
-    })
-    setNewClientName("")
-    setShowAddModal(false)
+    
+    setSubmitting(true)
+    try {
+        await createClient({
+            name: newClientName,
+            email: newClientEmail || undefined,
+        })
+        setNewClientName("")
+        setNewClientEmail("")
+        setShowAddModal(false)
+    } catch (error) {
+        // Error handled in store
+    } finally {
+        setSubmitting(false)
+    }
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">{t("clients")}</h2>
-        <Button onClick={() => setShowAddModal(true)} className="gap-2">
-            <Plus className="h-4 w-4" /> Add Client
-        </Button>
+        {role === "ADMIN" && (
+            <div className="flex gap-2">
+                <Button onClick={() => setShowObligationModal(true)} variant="outline" className="gap-2">
+                    <Plus className="h-4 w-4" /> Add Obligation
+                </Button>
+                <Button onClick={() => setShowAddModal(true)} className="gap-2">
+                    <Plus className="h-4 w-4" /> Add Client
+                </Button>
+            </div>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -59,7 +115,7 @@ export default function ClientsPage() {
                 <Card key={client.id} className="hover:shadow-md transition-shadow cursor-pointer">
                     <CardHeader className="flex flex-row items-center gap-4">
                         <Avatar className="h-12 w-12">
-                            <AvatarFallback className="bg-primary/10 text-primary font-bold">{client.logo}</AvatarFallback>
+                            <AvatarFallback className="bg-primary/10 text-primary font-bold">{client.logo || client.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                             <CardTitle className="text-base">{client.name}</CardTitle>
@@ -72,7 +128,7 @@ export default function ClientsPage() {
                     <CardContent>
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Obligations</span>
-                            <span className="font-medium">12 (3 Pending)</span>
+                            <span className="font-medium">--</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -93,10 +149,93 @@ export default function ClientsPage() {
                             <label className="text-sm font-medium">Client Name</label>
                             <Input value={newClientName} onChange={(e) => setNewClientName(e.target.value)} placeholder="Company Ltd." required />
                         </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Email (Optional)</label>
+                            <Input value={newClientEmail} onChange={(e) => setNewClientEmail(e.target.value)} placeholder="contact@company.com" type="email" />
+                        </div>
                     </CardContent>
                     <div className="flex justify-end gap-2 p-6 pt-0">
-                        <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)}>Cancel</Button>
-                        <Button type="submit">Create Client</Button>
+                        <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)} disabled={submitting}>Cancel</Button>
+                        <Button type="submit" disabled={submitting}>
+                            {submitting ? "Creating..." : "Create Client"}
+                        </Button>
+                    </div>
+                </form>
+            </Card>
+        </div>
+      )}
+
+      {/* Simple Modal for Add Obligation */}
+      {showObligationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+            <Card className="w-full max-w-md shadow-lg border">
+                <CardHeader>
+                    <CardTitle>Create Obligation</CardTitle>
+                </CardHeader>
+                <form onSubmit={handleCreateObligation}>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Title</label>
+                            <Input 
+                                value={newObligation.title} 
+                                onChange={(e) => setNewObligation({...newObligation, title: e.target.value})} 
+                                placeholder="e.g. Monthly VAT" 
+                                required 
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Client</label>
+                            <select 
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                value={newObligation.clientId}
+                                onChange={(e) => setNewObligation({...newObligation, clientId: e.target.value})}
+                                required
+                            >
+                                <option value="">Select Client</option>
+                                {clients.map(c => (
+                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Type</label>
+                                <select 
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    value={newObligation.type}
+                                    onChange={(e) => setNewObligation({...newObligation, type: e.target.value})}
+                                >
+                                    <option value="TAX">Tax</option>
+                                    <option value="LEGAL">Legal</option>
+                                    <option value="PAYMENT">Payment</option>
+                                    <option value="DOCUMENT">Document</option>
+                                    <option value="APPROVAL">Approval</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Due Date</label>
+                                <Input 
+                                    type="date"
+                                    value={newObligation.dueDate} 
+                                    onChange={(e) => setNewObligation({...newObligation, dueDate: e.target.value})} 
+                                    required 
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Description</label>
+                            <Input 
+                                value={newObligation.description} 
+                                onChange={(e) => setNewObligation({...newObligation, description: e.target.value})} 
+                                placeholder="Optional details" 
+                            />
+                        </div>
+                    </CardContent>
+                    <div className="flex justify-end gap-2 p-6 pt-0">
+                        <Button type="button" variant="ghost" onClick={() => setShowObligationModal(false)} disabled={submitting}>Cancel</Button>
+                        <Button type="submit" disabled={submitting}>
+                            {submitting ? "Creating..." : "Create Obligation"}
+                        </Button>
                     </div>
                 </form>
             </Card>

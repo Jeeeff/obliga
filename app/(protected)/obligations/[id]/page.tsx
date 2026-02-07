@@ -1,60 +1,169 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Calendar, CheckCircle, Paperclip, Send, User, ChevronRight, FileText, Upload, AlertCircle } from "lucide-react"
+import { Calendar, CheckCircle, Paperclip, Send, User, ChevronRight, FileText, Upload, AlertCircle, RefreshCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useStore } from "@/lib/store-context"
-import { mockUsers, mockActivities } from "@/lib/data"
 import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
+import { api } from "@/lib/api"
+import { Obligation, Comment, Attachment, Activity, ObligationStatus } from "@/lib/types"
+import { formatStatus, formatType } from "@/lib/mappers"
+import { useToast } from "@/lib/toast-context"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function ObligationDetailPage() {
   const params = useParams()
   const { t } = useI18n()
-  const { obligations, role, updateObligationStatus } = useStore()
+  const { role, updateObligationStatus } = useStore()
+  const { toast } = useToast()
   const id = params.id as string
-  const obligation = obligations.find((o) => o.id === id)
-  
-  const [comment, setComment] = useState("")
-  const [comments, setComments] = useState([
-    { id: 1, user: mockUsers[1], text: "Please review the attached documents.", time: "2 hours ago" }
-  ])
+  const router = useRouter()
+
+  const [obligation, setObligation] = useState<Obligation | null>(null)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [attachments, setAttachments] = useState<Attachment[]>([])
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [loading, setLoading] = useState(true)
+  const [commentText, setCommentText] = useState("")
+  const [uploading, setUploading] = useState(false)
+
+  const fetchData = useCallback(async () => {
+    try {
+        setLoading(true)
+        const results = await Promise.allSettled([
+            api.get(`/obligations/${id}`),
+            api.get(`/obligations/${id}/comments`),
+            api.get(`/obligations/${id}/attachments`),
+            api.get(`/activity?entityType=OBLIGATION&entityId=${id}`)
+        ])
+
+        const obResult = results[0]
+        const commentsResult = results[1]
+        const attachmentsResult = results[2]
+        const activityResult = results[3]
+
+        if (obResult.status === 'rejected') {
+            throw obResult.reason
+        }
+
+        const obData = obResult.value as any
+
+        // Map client name if it's an object in obData
+        const ob: Obligation = {
+            ...obData,
+            client: obData.client?.name || "Unknown",
+            dueDate: obData.dueDate.split('T')[0]
+        }
+
+        setObligation(ob)
+        setComments(commentsResult.status === 'fulfilled' ? commentsResult.value as Comment[] : [])
+        setAttachments(attachmentsResult.status === 'fulfilled' ? attachmentsResult.value as Attachment[] : [])
+        setActivities(activityResult.status === 'fulfilled' ? activityResult.value as Activity[] : [])
+    } catch (error: any) {
+        console.error("Failed to load obligation details", error)
+        toast(error.message || "Failed to load details", "error")
+        if (error.message?.includes("403") || error.status === 403) {
+            router.push("/dashboard")
+        }
+    } finally {
+        setLoading(false)
+    }
+  }, [id, router, toast])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!commentText.trim()) return
+
+    try {
+        await api.post(`/obligations/${id}/comments`, { message: commentText })
+        setCommentText("")
+        // Refresh comments
+        const newComments = await api.get(`/obligations/${id}/comments`)
+        setComments(newComments)
+        toast("Comment added", "success")
+    } catch (error) {
+        toast("Failed to add comment", "error")
+    }
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return
+    
+    const file = e.target.files[0]
+    const formData = new FormData()
+    formData.append("file", file)
+
+    setUploading(true)
+    try {
+        await api.post(`/obligations/${id}/attachments`, formData)
+        toast("File uploaded successfully", "success")
+        // Refresh attachments
+        const newAttachments = await api.get(`/obligations/${id}/attachments`)
+        setAttachments(newAttachments)
+    } catch (error) {
+        console.error(error)
+        toast("Failed to upload file", "error")
+    } finally {
+        setUploading(false)
+        // Reset input
+        e.target.value = ""
+    }
+  }
+
+  const handleReset = async () => {
+      if (!confirm("Are you sure you want to reset this obligation to PENDING?")) return
+      try {
+          await api.post(`/obligations/${id}/reset`, {})
+          toast("Obligation reset to Pending", "success")
+          fetchData()
+      } catch (error) {
+          toast("Failed to reset obligation", "error")
+      }
+  }
+
+  const handleStatusChange = async (status: ObligationStatus) => {
+      await updateObligationStatus(id, status)
+      fetchData()
+  }
+
+  if (loading) {
+      return <div className="p-8 space-y-4">
+          <Skeleton className="h-12 w-1/3" />
+          <Skeleton className="h-64 w-full" />
+      </div>
+  }
 
   if (!obligation) {
     return <div className="p-8 text-center">Obligation not found</div>
   }
 
   const steps = ["PENDING", "SUBMITTED", "UNDER_REVIEW", "APPROVED"]
-  // Map statuses to steps indices
   const getStepIndex = (status: string) => {
-    if (status === "CHANGES_REQUESTED") return 0 // Back to start? Or 1? Prompt says "CHANGES_REQUESTED -> PENDING" for Admin action. So effectively back to Pending.
-    if (status === "OVERDUE") return 0
+    if (status === "CHANGES_REQUESTED" || status === "OVERDUE") return 0
     return steps.findIndex(s => s === status)
   }
   
   const activeStep = getStepIndex(obligation.status)
   
-  const handleAddComment = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!comment.trim()) return
-    setComments([...comments, { id: Date.now(), user: mockUsers[0], text: comment, time: "Just now" }])
-    setComment("")
-  }
-
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between gap-4 md:items-start">
         <div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <span>Obligations</span>
+            <span className="cursor-pointer hover:underline" onClick={() => router.push('/dashboard')}>Obligations</span>
             <ChevronRight className="h-4 w-4" />
-            <span>{obligation.id}</span>
+            <span>{obligation.id.substring(0, 8)}...</span>
           </div>
           <h1 className="text-3xl font-bold">{obligation.title}</h1>
           <div className="flex items-center gap-4 mt-2">
@@ -66,6 +175,7 @@ export default function ObligationDetailPage() {
                 <Calendar className="h-4 w-4" />
                 <span>Due: {obligation.dueDate}</span>
             </div>
+            <Badge variant="outline">{formatType(obligation.type)}</Badge>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -74,8 +184,17 @@ export default function ObligationDetailPage() {
                  obligation.status === "OVERDUE" ? "destructive" :
                  obligation.status === "APPROVED" ? "success" : "outline"
             }>
-                {t(obligation.status.toLowerCase().replace(" ", "_"))}
+                {formatStatus(obligation.status)}
             </Badge>
+            
+            {role === "ADMIN" && obligation.status !== "PENDING" && (
+                <Button variant="outline" size="sm" onClick={handleReset}>
+                    <RefreshCcw className="h-4 w-4 mr-2" />
+                    Reset
+                </Button>
+            )}
+
+            {/* Action Buttons based on status/role could go here, but Stepper handles flow mostly */}
         </div>
       </div>
 
@@ -92,7 +211,7 @@ export default function ObligationDetailPage() {
                             {index < activeStep ? <CheckCircle className="h-5 w-5" /> : index + 1}
                         </div>
                         <span className={cn("text-xs mt-2 font-medium uppercase", index <= activeStep && activeStep !== -1 ? "text-foreground" : "text-muted-foreground")}>
-                            {step.replace("_", " ")}
+                            {formatStatus(step as ObligationStatus)}
                         </span>
                         {index < steps.length - 1 && (
                             <div className={cn(
@@ -103,181 +222,146 @@ export default function ObligationDetailPage() {
                     </div>
                 ))}
             </div>
+            
+            {/* Contextual Actions */}
+            <div className="mt-6 flex justify-end">
+                {role === "CLIENT" && obligation.status === "PENDING" && (
+                    <Button onClick={() => handleStatusChange("SUBMITTED")}>Submit for Review</Button>
+                )}
+                {role === "ADMIN" && obligation.status === "SUBMITTED" && (
+                    <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => handleStatusChange("CHANGES_REQUESTED")}>Request Changes</Button>
+                        <Button onClick={() => handleStatusChange("APPROVED")}>Approve</Button>
+                    </div>
+                )}
+            </div>
         </CardContent>
       </Card>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Left Column: Description & Attachments */}
         <div className="md:col-span-2 space-y-6">
-            {/* Description & Details */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Details</CardTitle>
+                    <CardTitle>Description</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <p className="text-muted-foreground">
-                        {obligation.description || "No description provided."}
-                    </p>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <span className="text-muted-foreground">Type:</span> <span className="font-medium">{obligation.type}</span>
-                        </div>
-                        <div>
-                            <span className="text-muted-foreground">Assigned to:</span> <span className="font-medium">{obligation.assignedTo || "Unassigned"}</span>
-                        </div>
-                    </div>
+                <CardContent>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{obligation.description || "No description provided."}</p>
                 </CardContent>
             </Card>
 
-            {/* Attachments */}
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Attachments</CardTitle>
-                    <Button size="sm" variant="outline" className="gap-2">
-                        <Upload className="h-4 w-4" /> Upload
-                    </Button>
+                    <div className="relative">
+                        <input 
+                            type="file" 
+                            id="file-upload" 
+                            className="hidden" 
+                            onChange={handleFileUpload} 
+                            disabled={uploading}
+                        />
+                        <Button size="sm" variant="outline" className="cursor-pointer" asChild disabled={uploading}>
+                            <label htmlFor="file-upload">
+                                {uploading ? <div className="animate-spin h-4 w-4 border-2 border-current rounded-full mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                                Upload
+                            </label>
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
-                            <div className="flex items-center gap-3">
-                                <FileText className="h-8 w-8 text-blue-500" />
-                                <div>
-                                    <p className="text-sm font-medium">Invoice_Jan_2026.pdf</p>
-                                    <p className="text-xs text-muted-foreground">2.4 MB • Uploaded 2 days ago</p>
-                                </div>
-                            </div>
-                            <Button variant="ghost" size="icon"><Paperclip className="h-4 w-4" /></Button>
-                        </div>
-                        {/* Mock empty state if needed */}
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Comments */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Comments</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                        {comments.map((c) => (
-                            <div key={c.id} className="flex gap-4">
-                                <Avatar className="h-8 w-8">
-                                    <AvatarImage src={c.user.avatar} />
-                                    <AvatarFallback>{c.user.name[0]}</AvatarFallback>
-                                </Avatar>
-                                <div className="bg-muted/50 p-3 rounded-lg flex-1">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="font-semibold text-sm">{c.user.name}</span>
-                                        <span className="text-xs text-muted-foreground">{c.time}</span>
+                    {attachments.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">No attachments yet.</p>
+                    ) : (
+                        <div className="space-y-2">
+                            {attachments.map(att => (
+                                <div key={att.id} className="flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-primary/10 rounded">
+                                            <FileText className="h-4 w-4 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-sm">{att.fileName}</p>
+                                            <p className="text-xs text-muted-foreground">{new Date(att.createdAt).toLocaleDateString()}</p>
+                                        </div>
                                     </div>
-                                    <p className="text-sm">{c.text}</p>
+                                    <Button variant="ghost" size="sm" asChild>
+                                        <a href={`${api.BASE_URL || ''}/attachments/${att.id}/download`} target="_blank" rel="noopener noreferrer">
+                                            Download
+                                        </a>
+                                    </Button>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                    <form onSubmit={handleAddComment} className="flex gap-2">
-                        <Input 
-                            placeholder="Add a comment..." 
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                        />
-                        <Button type="submit" size="icon"><Send className="h-4 w-4" /></Button>
-                    </form>
+                            ))}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
-        </div>
-
-        <div className="space-y-6">
-            {/* Actions */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    {/* CLIENT ACTIONS */}
-                    {role === "CLIENT" && (
-                        <>
-                            {(obligation.status === "PENDING" || obligation.status === "CHANGES_REQUESTED" || obligation.status === "OVERDUE") ? (
-                                <Button 
-                                    className="w-full gap-2" 
-                                    onClick={() => updateObligationStatus(obligation.id, "SUBMITTED")}
-                                >
-                                    <CheckCircle className="h-4 w-4" /> {t("mark_as_submitted")}
-                                </Button>
-                            ) : (
-                                <div className="p-3 bg-muted rounded-lg flex items-center gap-3 text-sm text-muted-foreground">
-                                    <CheckCircle className="h-4 w-4 text-green-500" />
-                                    Submitted — awaiting review
-                                </div>
-                            )}
-                        </>
-                    )}
-
-                    {/* ADMIN ACTIONS */}
-                    {role === "ADMIN" && (
-                        <>
-                            {(obligation.status === "SUBMITTED" || obligation.status === "UNDER_REVIEW") ? (
-                                <>
-                                    <Button 
-                                        className="w-full gap-2 bg-green-600 hover:bg-green-700" 
-                                        onClick={() => updateObligationStatus(obligation.id, "APPROVED")}
-                                    >
-                                        <CheckCircle className="h-4 w-4" /> {t("approve")}
-                                    </Button>
-                                    <Button 
-                                        variant="outline" 
-                                        className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                        onClick={() => updateObligationStatus(obligation.id, "CHANGES_REQUESTED")}
-                                    >
-                                        <AlertCircle className="h-4 w-4" /> {t("request_changes")}
-                                    </Button>
-                                </>
-                            ) : (
-                                <div className="text-sm text-muted-foreground text-center italic">
-                                    {obligation.status === "APPROVED" ? "This obligation is approved." : "Waiting for client submission."}
-                                </div>
-                            )}
-                            {/* Allow Admin to reset if Changes Requested? Prompt says: CHANGES_REQUESTED -> PENDING */}
-                            {obligation.status === "CHANGES_REQUESTED" && (
-                                <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    className="w-full mt-2"
-                                    onClick={() => updateObligationStatus(obligation.id, "PENDING")}
-                                >
-                                    Reset to Pending
-                                </Button>
-                            )}
-                        </>
-                    )}
-                    
-                    <div className="mt-4 pt-4 border-t text-xs text-muted-foreground">
-                        <p>Current Role: <span className="font-bold">{role}</span></p>
-                        <p className="opacity-70 mt-1">
-                            {role === "CLIENT" ? "Submit work for review." : "Review and approve client submissions."}
-                        </p>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Activity Timeline */}
+            
             <Card>
                 <CardHeader>
                     <CardTitle>Activity</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="relative border-l border-muted pl-4 space-y-6">
-                        {mockActivities.slice(0, 3).map((activity) => (
-                            <div key={activity.id} className="relative">
-                                <div className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-muted-foreground" />
-                                <p className="text-sm">
-                                    <span className="font-medium">{activity.user}</span> {activity.action}
-                                </p>
-                                <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
+                    <div className="space-y-4">
+                        {activities.map(act => (
+                            <div key={act.id} className="flex gap-3 text-sm">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarFallback>{act.user?.name?.substring(0, 2).toUpperCase() || "SY"}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p>
+                                        <span className="font-medium">{act.user?.name || "System"}</span>{" "}
+                                        <span className="text-muted-foreground">{act.action.toLowerCase().replace('_', ' ')}</span>
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">{new Date(act.createdAt).toLocaleString()}</p>
+                                </div>
                             </div>
                         ))}
+                        {activities.length === 0 && <p className="text-sm text-muted-foreground">No activity recorded.</p>}
                     </div>
+                </CardContent>
+            </Card>
+        </div>
+
+        {/* Right Column: Comments */}
+        <div className="space-y-6">
+            <Card className="h-full flex flex-col">
+                <CardHeader>
+                    <CardTitle>Comments</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col gap-4">
+                    <div className="flex-1 space-y-4 overflow-y-auto max-h-[500px] pr-2">
+                        {comments.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center my-8">No comments yet. Start the conversation!</p>
+                        ) : (
+                            comments.map(comment => (
+                                <div key={comment.id} className="flex gap-3">
+                                    <Avatar className="h-8 w-8 mt-1">
+                                        <AvatarFallback>{comment.user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="bg-muted/50 p-3 rounded-lg flex-1">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="font-medium text-sm">{comment.user.name}</span>
+                                            <span className="text-xs text-muted-foreground">{new Date(comment.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                        </div>
+                                        <p className="text-sm">{comment.message}</p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                    
+                    <form onSubmit={handleAddComment} className="mt-4 pt-4 border-t flex gap-2">
+                        <Input 
+                            placeholder="Type a comment..." 
+                            value={commentText}
+                            onChange={e => setCommentText(e.target.value)}
+                            className="flex-1"
+                        />
+                        <Button type="submit" size="icon" disabled={!commentText.trim()}>
+                            <Send className="h-4 w-4" />
+                        </Button>
+                    </form>
                 </CardContent>
             </Card>
         </div>

@@ -17,7 +17,7 @@ interface StoreContextType {
   updateObligationStatus: (id: string, status: ObligationStatus) => Promise<void>
   refreshObligations: () => Promise<void>
   retry: () => Promise<void>
-  addClient: (client: Client) => void
+  createClient: (client: Omit<Client, "id" | "status" | "logo">) => Promise<void>
   addActivity: (activity: Activity) => void
 }
 
@@ -151,8 +151,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const addClient = (client: Client) => {
-    setClients((prev) => [...prev, client])
+  const createClient = async (clientData: Omit<Client, "id" | "status" | "logo">) => {
+    try {
+        await api.post("/clients", clientData)
+        toast("Client created successfully", "success")
+        await fetchClients()
+    } catch (e: any) {
+        console.error("Create client failed", e)
+        toast(e.message || "Failed to create client", "error")
+        throw e // Re-throw to let component know
+    }
   }
 
   const addActivity = (activity: Activity) => {
@@ -172,7 +180,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         updateObligationStatus,
         refreshObligations: fetchObligations,
         retry,
-        addClient,
+        createClient,
         addActivity,
       }}
     >

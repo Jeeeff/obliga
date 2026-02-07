@@ -32,7 +32,7 @@ export const listActivity = async (req: AuthRequest, res: Response, next: NextFu
     
     const enrichedLogs = logs.map(log => ({
         ...log,
-        actor: userMap[log.actorUserId] || { name: 'Unknown' }
+        user: userMap[log.actorUserId] || { name: 'Unknown' }
     }))
 
     res.json(enrichedLogs)
