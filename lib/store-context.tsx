@@ -16,6 +16,7 @@ interface StoreContextType {
   logout: () => void
   updateObligationStatus: (id: string, status: ObligationStatus) => Promise<void>
   refreshObligations: () => Promise<void>
+  retry: () => Promise<void>
   addClient: (client: Client) => void
   addActivity: (activity: Activity) => void
 }
@@ -31,72 +32,90 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [clients, setClients] = useState<Client[]>([])
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
+  const [authChecked, setAuthChecked] = useState(false)
+
+  const initialized = React.useRef(false)
 
   const fetchUser = async () => {
-    try {
-      const userData = await api.get("/auth/me")
-      setUser({
-        id: userData.id,
-        name: userData.name,
-        email: userData.email,
-        avatar: "https://github.com/shadcn.png", // Mock avatar for now
-        role: userData.role,
-        workspaceName: userData.workspace?.name
-      })
-      setRole(userData.role)
-    } catch (e) {
-      console.error("Failed to fetch user", e)
-      // toast("Failed to fetch user session", "error")
-    }
+    // Let errors propagate to caller for handling
+    const userData = await api.get("/auth/me")
+    setUser({
+      id: userData.id,
+      name: userData.name,
+      email: userData.email,
+      avatar: "https://github.com/shadcn.png", // Mock avatar for now
+      role: userData.role,
+      workspaceName: userData.workspace?.name
+    })
+    setRole(userData.role)
+    return userData
   }
 
   const fetchObligations = async () => {
-    try {
-      const data = await api.get("/obligations")
-      const mapped = data.map((o: any) => ({
-        id: o.id,
-        title: o.title,
-        client: o.client?.name || "Unknown",
-        clientId: o.clientId,
-        type: o.type,
-        dueDate: o.dueDate.split('T')[0],
-        status: o.status,
-        description: o.description
-      }))
-      setObligations(mapped)
-    } catch (e) {
-      console.error("Failed to fetch obligations", e)
-    }
+    const data = await api.get("/obligations")
+    const mapped = data.map((o: any) => ({
+      id: o.id,
+      title: o.title,
+      client: o.client?.name || "Unknown",
+      clientId: o.clientId,
+      type: o.type,
+      dueDate: o.dueDate.split('T')[0],
+      status: o.status,
+      description: o.description
+    }))
+    setObligations(mapped)
   }
 
   const fetchClients = async () => {
+    const data = await api.get("/clients")
+    const mapped = data.map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      email: c.email,
+      logo: "/file.svg",
+      status: "Active"
+    }))
+    setClients(mapped)
+  }
+
+  const loadData = async () => {
+    setLoading(true)
     try {
-      const data = await api.get("/clients")
-      const mapped = data.map((c: any) => ({
-        id: c.id,
-        name: c.name,
-        email: c.email,
-        logo: "/file.svg",
-        status: "Active"
-      }))
-      setClients(mapped)
-    } catch (e) {
-      console.error("Failed to fetch clients", e)
+      const token = localStorage.getItem("accessToken")
+      if (!token) {
+        setAuthChecked(true)
+        setLoading(false)
+        return
+      }
+
+      await fetchUser()
+      // Only fetch data if user fetch succeeded
+      await Promise.all([fetchObligations(), fetchClients()])
+      setAuthChecked(true)
+    } catch (e: any) {
+      console.warn("Data load failed:", e.message)
+      setAuthChecked(true)
+      
+      // Only show toast if it's not a 401 (which redirects) and not an abort
+      if (e.message && !e.message.includes("401")) {
+         toast("Connection failed. Click retry to try again.", "error")
+      }
+    } finally {
+      setLoading(false)
     }
   }
 
-  // Initial load
+  // Initial load with guard
   useEffect(() => {
-    const init = async () => {
-      const token = localStorage.getItem("accessToken")
-      if (token) {
-        await fetchUser()
-        await Promise.all([fetchObligations(), fetchClients()])
-      }
-      setLoading(false)
-    }
-    init()
+    if (initialized.current) return
+    initialized.current = true
+    loadData()
   }, [])
+
+  const retry = async () => {
+    // Allow manual retry
+    await loadData()
+  }
 
   const logout = () => {
     localStorage.removeItem("accessToken")
@@ -152,6 +171,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         logout,
         updateObligationStatus,
         refreshObligations: fetchObligations,
+        retry,
         addClient,
         addActivity,
       }}
