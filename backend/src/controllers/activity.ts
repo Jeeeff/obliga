@@ -1,13 +1,14 @@
 import { Response, NextFunction } from 'express'
 import prisma from '../utils/prisma'
 import { AuthRequest } from '../middleware/auth'
+import { Prisma } from '@prisma/client'
 
 export const listActivity = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const tenantId = req.user?.tenantId
     const { entityType, entityId } = req.query
 
-    const where: any = { tenantId }
+    const where: Prisma.ActivityLogWhereInput = { tenantId }
     if (entityType) where.entityType = String(entityType)
     if (entityId) where.entityId = String(entityId)
 

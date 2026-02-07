@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { api } from "@/lib/api"
+import { Invoice } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -12,7 +13,7 @@ import Link from "next/link"
 
 export default function InvoiceDetailsPage() {
   const params = useParams()
-  const [invoice, setInvoice] = useState<any>(null)
+  const [invoice, setInvoice] = useState<Invoice | null>(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
 
@@ -40,7 +41,7 @@ export default function InvoiceDetailsPage() {
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 
             (process.env.NODE_ENV === "production" ? "https://api.obliga.devlogicstudio.cloud" : "http://localhost:3001/api");
             
-        const response = await fetch(`${baseUrl}/invoices/${invoice.id}/pdf`, {
+        const response = await fetch(`${baseUrl}/invoices/${invoice!.id}/pdf`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -52,7 +53,7 @@ export default function InvoiceDetailsPage() {
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `invoice-${invoice.id}.pdf`
+        a.download = `invoice-${invoice!.id}.pdf`
         document.body.appendChild(a)
         a.click()
         a.remove()
@@ -66,7 +67,7 @@ export default function InvoiceDetailsPage() {
     if (!confirm("Enviar fatura por email para o cliente?")) return
     setProcessing(true)
     try {
-      await api.request(`/invoices/${invoice.id}/send`, { method: "POST" })
+      await api.request(`/invoices/${invoice!.id}/send`, { method: "POST" })
       alert("Email enviado com sucesso!")
     } catch (error) {
       console.error("Email send failed", error)
@@ -77,16 +78,17 @@ export default function InvoiceDetailsPage() {
   }
 
   const handlePay = async (gateway: string) => {
+    if (!invoice) return
     if (!confirm(`Processar pagamento via ${gateway}?`)) return
     setProcessing(true)
     try {
-      await api.request(`/invoices/${invoice.id}/pay`, { 
+      await api.request(`/invoices/${invoice!.id}/pay`, { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ gateway })
       })
       alert("Pagamento processado com sucesso!")
-      loadInvoice(invoice.id) // Reload to update status
+      loadInvoice(invoice!.id) // Reload to update status
     } catch (error) {
       console.error("Payment failed", error)
       alert("Erro ao processar pagamento")
@@ -162,7 +164,7 @@ export default function InvoiceDetailsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-                {invoice.items.map((item: any) => (
+                {invoice.items.map((item) => (
                     <TableRow key={item.id}>
                         <TableCell>{item.description}</TableCell>
                         <TableCell className="text-right">{item.quantity}</TableCell>

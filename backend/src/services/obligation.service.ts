@@ -1,12 +1,18 @@
 import prisma from '../utils/prisma'
-import { ObligationStatus } from '@prisma/client'
+import { Prisma, ObligationStatus } from '@prisma/client'
 import { openClaw, OpenClawContext } from '../integrations/openclaw'
 
+interface ObligationFilters {
+    status?: ObligationStatus;
+    clientId?: string;
+    q?: string;
+}
+
 export class ObligationService {
-    async list(tenantId: string, filters: any, userId?: string) {
+    async list(tenantId: string, filters: ObligationFilters, userId?: string) {
         const { status, clientId, q } = filters
         
-        const where: any = { tenantId }
+        const where: Prisma.ObligationWhereInput = { tenantId }
         if (status) where.status = status
         if (clientId) where.clientId = clientId
         if (q) {
@@ -23,7 +29,7 @@ export class ObligationService {
             }
         }
 
-        let obligations = await prisma.obligation.findMany({
+        const obligations = await prisma.obligation.findMany({
             where,
             include: { client: true },
             orderBy: { dueDate: 'asc' }
@@ -33,7 +39,7 @@ export class ObligationService {
         return obligations.map(this.checkOverdue)
     }
 
-    async create(tenantId: string, userId: string, data: any, context: OpenClawContext) {
+    async create(tenantId: string, userId: string, data: Omit<Prisma.ObligationUncheckedCreateInput, 'tenant' | 'status' | 'tenantId'>, context: OpenClawContext) {
         // Validate client belongs to tenant
         const client = await prisma.client.findFirst({
             where: { id: data.clientId, tenantId }
@@ -65,8 +71,9 @@ export class ObligationService {
         return obligation
     }
 
+
     async get(tenantId: string, id: string, userId: string) {
-        let obligation = await prisma.obligation.findFirst({
+        const obligation = await prisma.obligation.findFirst({
             where: { id, tenantId },
             include: { client: true, comments: { include: { user: true } }, attachments: true }
         })
@@ -84,7 +91,7 @@ export class ObligationService {
         return this.checkOverdue(obligation)
     }
 
-    async update(tenantId: string, id: string, data: any, context: OpenClawContext) {
+    async update(tenantId: string, id: string, data: Prisma.ObligationUpdateInput, context: OpenClawContext) {
         const result = await prisma.obligation.updateMany({
             where: { id, tenantId },
             data
@@ -132,7 +139,7 @@ export class ObligationService {
         return prisma.obligation.findFirst({ where: { id, tenantId } })
     }
 
-    async addComment(tenantId: string, id: string, userId: string, message: string, context: OpenClawContext) {
+    async addComment(tenantId: string, id: string, userId: string, message: string, _context: OpenClawContext) { // eslint-disable-line @typescript-eslint/no-unused-vars
         const obligation = await prisma.obligation.findFirst({ where: { id, tenantId } })
         if (!obligation) throw new Error('Not found')
         
@@ -186,7 +193,7 @@ export class ObligationService {
         })
     }
 
-    private checkOverdue(obligation: any) {
+    private checkOverdue<T extends { dueDate: Date; status: string }>(obligation: T) {
         const now = new Date()
         const isOverdue = obligation.dueDate < now && obligation.status !== 'APPROVED'
         

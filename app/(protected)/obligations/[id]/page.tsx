@@ -2,14 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Calendar, CheckCircle, Paperclip, Send, User, ChevronRight, FileText, Upload, AlertCircle, RefreshCcw } from "lucide-react"
+import { Calendar, CheckCircle, Send, User, ChevronRight, FileText, Upload, RefreshCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useStore } from "@/lib/store-context"
-import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api"
 import { Obligation, Comment, Attachment, Activity, ObligationStatus } from "@/lib/types"
@@ -19,7 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default function ObligationDetailPage() {
   const params = useParams()
-  const { t } = useI18n()
+  // const { t } = useI18n()
   const { role, updateObligationStatus } = useStore()
   const { toast } = useToast()
   const id = params.id as string
@@ -52,6 +51,7 @@ export default function ObligationDetailPage() {
             throw obResult.reason
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const obData = obResult.value as any
 
         // Map client name if it's an object in obData
@@ -65,10 +65,12 @@ export default function ObligationDetailPage() {
         setComments(commentsResult.status === 'fulfilled' ? commentsResult.value as Comment[] : [])
         setAttachments(attachmentsResult.status === 'fulfilled' ? attachmentsResult.value as Attachment[] : [])
         setActivities(activityResult.status === 'fulfilled' ? activityResult.value as Activity[] : [])
-    } catch (error: any) {
-        console.error("Failed to load obligation details", error)
-        toast(error.message || "Failed to load details", "error")
-        if (error.message?.includes("403") || error.status === 403) {
+    } catch (error: unknown) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const err = error as any
+        console.error("Failed to load obligation details", err)
+        toast(err.message || "Failed to load details", "error")
+        if (err.message?.includes("403") || err.status === 403) {
             router.push("/dashboard")
         }
     } finally {
@@ -91,7 +93,7 @@ export default function ObligationDetailPage() {
         const newComments = await api.get(`/obligations/${id}/comments`)
         setComments(newComments)
         toast("Comment added", "success")
-    } catch (error) {
+    } catch {
         toast("Failed to add comment", "error")
     }
   }
@@ -126,7 +128,7 @@ export default function ObligationDetailPage() {
           await api.post(`/obligations/${id}/reset`, {})
           toast("Obligation reset to Pending", "success")
           fetchData()
-      } catch (error) {
+      } catch {
           toast("Failed to reset obligation", "error")
       }
   }

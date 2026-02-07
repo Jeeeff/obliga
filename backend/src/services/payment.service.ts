@@ -13,7 +13,7 @@ export const processPayment = async (invoiceId: string, amount: number, gateway:
     };
 };
 
-export const createPaymentIntent = async (invoiceId: string, amount: number) => {
+export const createPaymentIntent = async () => {
     return {
         clientSecret: `pi_${Math.random().toString(36).substring(7)}_secret_${Math.random().toString(36).substring(7)}`
     };

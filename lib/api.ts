@@ -95,14 +95,15 @@ export const api = {
     }
 
     // Fallback: return text for non-JSON (rare)
-    return response.text()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return response.text() as Promise<any>
   },
 
   get(endpoint: string) {
     return this.request(endpoint, { method: "GET" })
   },
 
-  post(endpoint: string, body: any) {
+  post(endpoint: string, body: unknown) {
     const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
     return this.request(endpoint, {
       method: "POST",
@@ -110,7 +111,7 @@ export const api = {
     })
   },
 
-  put(endpoint: string, body: any) {
+  put(endpoint: string, body: unknown) {
     return this.request(endpoint, {
       method: "PUT",
       body: JSON.stringify(body),

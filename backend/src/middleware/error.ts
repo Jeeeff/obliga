@@ -3,11 +3,13 @@ import { ZodError } from 'zod'
 import { logger } from '../utils/logger'
 import { env } from '../config/env'
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export const errorHandler = (
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   const requestId = req.id
   

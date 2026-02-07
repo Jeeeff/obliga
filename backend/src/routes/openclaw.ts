@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, RequestHandler } from 'express'
 import { getSummary, getAlerts, createInvoice, getCashflow } from '../controllers/openclaw'
 import { openClawAuth } from '../middleware/openclaw-auth'
 import { rateLimit } from 'express-rate-limit'
@@ -13,12 +13,12 @@ const openClawLimiter = rateLimit({
 })
 
 // Apply Auth & Rate Limit
-router.use(openClawAuth)
+router.use(openClawAuth as RequestHandler)
 router.use(openClawLimiter)
 
-router.get('/summary', getSummary)
-router.get('/alerts', getAlerts)
-router.post('/invoice', createInvoice)
-router.get('/cashflow', getCashflow)
+router.get('/summary', getSummary as RequestHandler)
+router.get('/alerts', getAlerts as RequestHandler)
+router.post('/invoice', createInvoice as RequestHandler)
+router.get('/cashflow', getCashflow as RequestHandler)
 
 export default router

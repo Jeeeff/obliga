@@ -2,15 +2,13 @@ import { Request, Response } from 'express';
 import { InvoiceService } from '../services/invoice.service';
 import { generateInvoicePdf } from '../services/pdf.service';
 import { logger } from '../utils/logger';
-import { AuthRequest } from '../middleware/auth';
 
 const getTenantId = (req: Request): string => {
-    const authReq = req as AuthRequest;
-    if (authReq.user?.tenantId) return authReq.user.tenantId;
+    // Check for standard AuthRequest user
+    if (req.user?.tenantId) return req.user.tenantId;
     
     // Check for OpenClaw request
-    const openClawReq = req as any;
-    if (openClawReq.tenant?.id) return openClawReq.tenant.id;
+    if (req.tenant?.id) return req.tenant.id;
 
     throw new Error('Tenant context missing');
 };
@@ -55,7 +53,17 @@ export const downloadInvoicePdf = async (req: Request, res: Response) => {
         const invoice = await InvoiceService.getById(tenantId, req.params.id as string);
         if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
 
-        const pdfBuffer = await generateInvoicePdf(invoice);
+        // Convert decimals to number/string for PDF generation
+        const invoiceForPdf = {
+            ...invoice,
+            amount: Number(invoice.amount),
+            items: invoice.items.map(item => ({
+                ...item,
+                price: Number(item.price)
+            }))
+        };
+
+        const pdfBuffer = await generateInvoicePdf(invoiceForPdf);
         
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=invoice-${invoice.id}.pdf`);
@@ -71,9 +79,10 @@ export const sendInvoice = async (req: Request, res: Response) => {
         const tenantId = getTenantId(req);
         await InvoiceService.sendInvoiceEmail(tenantId, req.params.id as string);
         res.json({ message: 'Invoice sent successfully' });
-    } catch (error: any) {
-        logger.error({ err: error }, 'Send Invoice Error');
-        res.status(500).json({ error: error.message || 'Failed to send invoice' });
+    } catch (error) {
+        const err = error as Error;
+        logger.error({ err }, 'Send Invoice Error');
+        res.status(500).json({ error: err.message || 'Failed to send invoice' });
     }
 };
 
@@ -82,8 +91,9 @@ export const payInvoice = async (req: Request, res: Response) => {
         const tenantId = getTenantId(req);
         const result = await InvoiceService.pay(tenantId, req.params.id as string, req.body.gateway || 'stripe');
         res.json(result);
-    } catch (error: any) {
-        logger.error({ err: error }, 'Pay Invoice Error');
-        res.status(500).json({ error: error.message || 'Failed to process payment' });
+    } catch (error) {
+        const err = error as Error;
+        logger.error({ err }, 'Pay Invoice Error');
+        res.status(500).json({ error: err.message || 'Failed to process payment' });
     }
 };

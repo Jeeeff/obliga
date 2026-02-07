@@ -1,6 +1,5 @@
 import { logger } from '../utils/logger'
 import nodemailer from 'nodemailer'
-import { env } from '../config/env'
 
 interface Attachment {
     filename: string;

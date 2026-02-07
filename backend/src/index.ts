@@ -1,7 +1,6 @@
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
-import path from 'path'
 import { env } from './config/env'
 import { logger } from './utils/logger'
 import { requestLogger } from './middleware/request-logger'
@@ -29,10 +28,20 @@ app.set('trust proxy', 1)
 app.use(helmet())
 
 // CORS
+const allowedOrigins = env.CORS_ORIGINS || [];
+
 app.use(cors({
-  origin: env.CORS_ORIGINS,
-  credentials: true // Only enabled if necessary
-}))
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+}));
 
 // Request Logging
 app.use(requestLogger)
@@ -61,7 +70,6 @@ app.get('/readyz', async (req, res) => {
 })
 
 import { authenticate } from './middleware/auth'
-import { openClawAuth } from './middleware/openclaw-auth'
 
 // Routes
 app.use('/api/auth', authLimiter, authRoutes) // Apply stricter limit to auth

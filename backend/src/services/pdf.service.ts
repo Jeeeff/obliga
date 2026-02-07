@@ -1,9 +1,25 @@
 import PDFDocument from 'pdfkit';
-import fs from 'fs';
-import path from 'path';
 
-export const generateInvoicePdf = async (invoice: any): Promise<Buffer> => {
-    return new Promise((resolve, reject) => {
+interface InvoiceItemForPdf {
+    description: string;
+    quantity: number;
+    price: number | string; // handling both just in case
+}
+
+interface InvoiceForPdf {
+    id: string;
+    createdAt: Date;
+    dueDate: Date;
+    amount: number | string;
+    client: {
+        name: string;
+        email?: string | null;
+    };
+    items: InvoiceItemForPdf[];
+}
+
+export const generateInvoicePdf = async (invoice: InvoiceForPdf): Promise<Buffer> => {
+    return new Promise((resolve) => {
         const doc = new PDFDocument({ margin: 50 });
         const buffers: Buffer[] = [];
 

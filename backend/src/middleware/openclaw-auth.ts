@@ -15,7 +15,8 @@ export const openClawAuth = async (req: Request, res: Response, next: NextFuncti
         const apiKey = req.headers['x-api-key'] as string
 
         if (!apiKey) {
-            return res.status(401).json({ error: 'Missing API Key' })
+            res.status(401).json({ error: 'Missing API Key' })
+            return
         }
 
         // Validate API Key
@@ -40,11 +41,13 @@ export const openClawAuth = async (req: Request, res: Response, next: NextFuncti
         })
 
         if (!tenant) {
-            return res.status(401).json({ error: 'Invalid API Key' })
+            res.status(401).json({ error: 'Invalid API Key' })
+            return
         }
 
         if (tenant.status !== 'ACTIVE') {
-            return res.status(403).json({ error: 'Tenant is not active' })
+            res.status(403).json({ error: 'Tenant is not active' })
+            return
         }
 
         // Attach tenant to request
@@ -70,6 +73,6 @@ export const openClawAuth = async (req: Request, res: Response, next: NextFuncti
         
     } catch (error) {
         logger.error({ err: error }, 'OpenClaw Auth Error')
-        return res.status(500).json({ error: 'Internal Server Error' })
+        res.status(500).json({ error: 'Internal Server Error' })
     }
 }

@@ -68,10 +68,28 @@ export interface Activity {
   entityType: string
   entityId: string
   action: string
-  meta: any
+  meta: Record<string, unknown>
   createdAt: string
   user?: { // Expanded for UI
       name: string
       avatar?: string
   }
+}
+
+export interface InvoiceItem {
+  id: string
+  description: string
+  quantity: number
+  price: number
+}
+
+export interface Invoice {
+  id: string
+  clientId: string
+  client?: { name: string; email: string }
+  status: 'DRAFT' | 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED'
+  dueDate: string
+  amount: number
+  items: InvoiceItem[]
+  createdAt: string
 }

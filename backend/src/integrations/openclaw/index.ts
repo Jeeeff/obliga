@@ -20,7 +20,7 @@ class OpenClawStub implements OpenClawClient {
         this.enabled = env.OPENCLAW_ENABLED
     }
 
-    private logCall(method: string, context: OpenClawContext, data: any) {
+    private logCall(method: string, context: OpenClawContext, data: unknown) {
         if (!this.enabled) return
 
         logger.info({

@@ -147,6 +147,7 @@ export const me = async (req: AuthRequest, res: Response, next: NextFunction) =>
         if (!user) return res.status(404).json({ error: 'User not found' })
 
         // Remove sensitive data
+        /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
         const { passwordHash, ...userData } = user
         res.json(userData)
     } catch (error) {

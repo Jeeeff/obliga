@@ -29,13 +29,22 @@ export default function LoginPage() {
     const password = formData.get("password") as string
 
     try {
-      const data = await api.post("/auth/login", { email, password })
-      localStorage.setItem("accessToken", data.accessToken)
-      // localStorage.setItem("refreshToken", data.refreshToken) // Removed for security
-      router.push("/dashboard")
-    } catch (err: any) {
-      setError(err.message || "Login failed")
-    } finally {
+      console.log("Login attempt started...");
+      const data = await api.post("/auth/login", { email, password });
+      console.log("API response received:", data);
+
+      if (data && data.accessToken) {
+        localStorage.setItem("accessToken", data.accessToken);
+        console.log("Access token stored. Redirecting to /dashboard...");
+        router.push("/dashboard");
+        console.log("Redirect command issued.");
+      } else {
+        console.error("Login successful, but no access token received.");
+        setError("An unexpected error occurred. Missing access token.");
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Login failed"
+      setError(message)
       setLoading(false)
     }
   }

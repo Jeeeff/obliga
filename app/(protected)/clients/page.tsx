@@ -12,6 +12,7 @@ import { useStore } from "@/lib/store-context"
 import { useI18n } from "@/lib/i18n"
 
 import { api } from "@/lib/api"
+import { ObligationType } from "@/lib/types"
 
 export default function ClientsPage() {
   const { t } = useI18n()
@@ -73,7 +74,7 @@ export default function ClientsPage() {
         setNewClientName("")
         setNewClientEmail("")
         setShowAddModal(false)
-    } catch (error) {
+    } catch {
         // Error handled in store
     } finally {
         setSubmitting(false)
@@ -203,7 +204,7 @@ export default function ClientsPage() {
                                 <select 
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                     value={newObligation.type}
-                                    onChange={(e) => setNewObligation({...newObligation, type: e.target.value as any})}
+                                    onChange={(e) => setNewObligation({...newObligation, type: e.target.value as ObligationType})}
                                 >
                                     <option value="PAYMENT">Payment</option>
                                     <option value="DOCUMENT">Document</option>

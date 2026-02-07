@@ -5,7 +5,6 @@ import fs from 'fs'
 import { v4 as uuidv4 } from 'uuid'
 import prisma from '../utils/prisma'
 import { AuthRequest } from '../middleware/auth'
-import { logger } from '../utils/logger'
 
 // --- Multer Configuration ---
 const uploadDir = path.join(process.cwd(), 'uploads')
@@ -49,8 +48,8 @@ const storage = multer.diskStorage({
             }
 
             cb(null, dir)
-        } catch (error: any) {
-            cb(error, '')
+        } catch (error) {
+            cb(error as Error, '')
         }
     },
     filename: (req, file, cb) => {

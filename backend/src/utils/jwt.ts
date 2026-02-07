@@ -1,18 +1,32 @@
 import jwt from 'jsonwebtoken'
-import { User } from '@prisma/client'
+import { User, Role as UserRole } from '@prisma/client'
 
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'access-secret'
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret'
 
+export interface JwtPayload {
+  userId: string
+  tenantId: string
+  role: UserRole
+  clientId?: string | null
+}
+
 export const generateTokens = (user: User) => {
+  const payload: JwtPayload = { 
+    userId: user.id, 
+    tenantId: user.tenantId, 
+    role: user.role, 
+    clientId: user.clientId 
+  }
+  
   const accessToken = jwt.sign(
-    { userId: user.id, tenantId: user.tenantId, role: user.role, clientId: user.clientId },
+    payload,
     ACCESS_SECRET,
     { expiresIn: '15m' }
   )
 
   const refreshToken = jwt.sign(
-    { userId: user.id, tenantId: user.tenantId, role: user.role, clientId: user.clientId },
+    payload,
     REFRESH_SECRET,
     { expiresIn: '7d' }
   )
@@ -20,10 +34,11 @@ export const generateTokens = (user: User) => {
   return { accessToken, refreshToken }
 }
 
-export const verifyAccessToken = (token: string) => {
-  return jwt.verify(token, ACCESS_SECRET) as any
+export const verifyAccessToken = (token: string): JwtPayload => {
+  return jwt.verify(token, ACCESS_SECRET) as JwtPayload
 }
 
-export const verifyRefreshToken = (token: string) => {
-  return jwt.verify(token, REFRESH_SECRET) as any
+export const verifyRefreshToken = (token: string): JwtPayload => {
+  return jwt.verify(token, REFRESH_SECRET) as JwtPayload
 }
+

@@ -39,7 +39,7 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
     context.run({ tenantId: payload.tenantId, userId: payload.userId }, () => {
       next()
     })
-  } catch (_error) {
+  } catch {
     return res.status(401).json({ error: 'Unauthorized: Invalid token' })
   }
 }

@@ -1,4 +1,5 @@
 import prisma from '../utils/prisma'
+import { Prisma } from '@prisma/client'
 import { OpenClawContext } from '../integrations/openclaw'
 
 export class ClientService {
@@ -21,7 +22,7 @@ export class ClientService {
         }
     }
 
-    async create(tenantId: string, userId: string, data: any, context: OpenClawContext) {
+    async create(tenantId: string, userId: string, data: Omit<Prisma.ClientUncheckedCreateInput, 'tenantId'>, _context: OpenClawContext) { // eslint-disable-line @typescript-eslint/no-unused-vars
          const client = await prisma.client.create({
             data: {
                 ...data,
@@ -44,6 +45,7 @@ export class ClientService {
         return client
     }
 
+
     async get(tenantId: string, id: string, role: string, clientId?: string) {
         // If role is CLIENT, they must be requesting their own ID
         if (role === 'CLIENT' && clientId !== id) {
@@ -58,7 +60,7 @@ export class ClientService {
         return client
     }
 
-    async update(tenantId: string, id: string, data: any, context: OpenClawContext) {
+    async update(tenantId: string, id: string, data: Prisma.ClientUncheckedUpdateInput, _context: OpenClawContext) { // eslint-disable-line @typescript-eslint/no-unused-vars
         const result = await prisma.client.updateMany({
             where: { id, tenantId },
             data

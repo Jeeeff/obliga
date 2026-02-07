@@ -15,7 +15,7 @@ const obligationSchema = z.object({
 })
 
 const getContext = (req: AuthRequest): OpenClawContext => ({
-    requestId: (req as any).id || 'unknown',
+    requestId: req.id || 'unknown',
     actorUserId: req.user!.userId,
     tenantId: req.user!.tenantId,
     featureFlags: {
@@ -26,7 +26,7 @@ const getContext = (req: AuthRequest): OpenClawContext => ({
 export const listObligations = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const tenantId = req.user?.tenantId
-    const status = req.query.status as string | undefined
+    const status = req.query.status as ObligationStatus | undefined
     const clientId = req.query.clientId as string | undefined
     const q = req.query.q as string | undefined
 

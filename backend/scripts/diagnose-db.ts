@@ -47,7 +47,7 @@ async function main() {
       try {
         // Unsafe query here is fine for diagnostic script on trusted input (table name from schema)
         // We use $queryRawUnsafe because table name cannot be parameterized in identifiers
-        const countResult: any = await prisma.$queryRawUnsafe(`SELECT COUNT(*) as count FROM "${tableName}"`);
+        const countResult = await prisma.$queryRawUnsafe<{ count: bigint }[]>(`SELECT COUNT(*) as count FROM "${tableName}"`);
         const count = typeof countResult[0].count === 'bigint' ? countResult[0].count.toString() : countResult[0].count;
         console.log(`  -> Rows: ${count}`);
       } catch (e) {

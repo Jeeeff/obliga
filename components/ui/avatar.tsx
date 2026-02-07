@@ -23,6 +23,7 @@ const AvatarImage = React.forwardRef<
   // eslint-disable-next-line @next/next/no-img-element
   <img
     ref={ref}
+    alt="Avatar"
     className={cn("aspect-square h-full w-full", className)}
     {...props}
   />

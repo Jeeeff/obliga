@@ -3,6 +3,7 @@ import request from 'supertest';
 import app from '../index';
 import prisma from '../utils/prisma';
 import { expect } from '@jest/globals';
+import bcrypt from 'bcrypt';
 
 const TEST_PREFIX = `test_${Date.now()}`;
 
@@ -44,7 +45,6 @@ describe('API Integration Tests', () => {
         });
         
         // I need bcrypt to hash password for setup
-        const bcrypt = require('bcrypt');
         const hash = await bcrypt.hash(password, 10);
         
         // Update Admin with real hash
@@ -70,7 +70,7 @@ describe('API Integration Tests', () => {
     describe('Auth & Permissions', () => {
         it('should login as admin', async () => {
             const res = await request(app)
-                .post('/auth/login')
+                .post('/api/auth/login')
                 .send({ email: adminEmail, password });
             
             expect(res.status).toBe(200);
@@ -80,7 +80,7 @@ describe('API Integration Tests', () => {
 
         it('should get current user profile', async () => {
             const res = await request(app)
-                .get('/auth/me')
+                .get('/api/auth/me')
                 .set('Authorization', `Bearer ${adminToken}`);
             
             expect(res.status).toBe(200);
@@ -92,7 +92,7 @@ describe('API Integration Tests', () => {
     describe('Clients Management', () => {
         it('should allow admin to create a client', async () => {
             const res = await request(app)
-                .post('/clients')
+                .post('/api/clients')
                 .set('Authorization', `Bearer ${adminToken}`)
                 .send({
                     name: 'Test Client Ltd',
@@ -105,17 +105,16 @@ describe('API Integration Tests', () => {
 
         it('should list clients as admin', async () => {
             const res = await request(app)
-                .get('/clients')
+                .get('/api/clients')
                 .set('Authorization', `Bearer ${adminToken}`);
             
             expect(res.status).toBe(200);
             expect(Array.isArray(res.body)).toBe(true);
-            expect(res.body.find((c: any) => c.id === clientId)).toBeTruthy();
+            expect(res.body.find((c: { id: string }) => c.id === clientId)).toBeTruthy();
         });
 
         // Setup Client User
         it('should setup client user', async () => {
-             const bcrypt = require('bcrypt');
              const hash = await bcrypt.hash(password, 10);
 
              // Create User linked to Client
@@ -132,7 +131,7 @@ describe('API Integration Tests', () => {
 
              // Login as Client
              const res = await request(app)
-                .post('/auth/login')
+                .post('/api/auth/login')
                 .send({ email: clientEmail, password });
              
              expect(res.status).toBe(200);
@@ -143,7 +142,7 @@ describe('API Integration Tests', () => {
     describe('Obligations Flow', () => {
         it('should allow admin to create obligation', async () => {
             const res = await request(app)
-                .post('/obligations')
+                .post('/api/obligations')
                 .set('Authorization', `Bearer ${adminToken}`)
                 .send({
                     title: 'Monthly Tax',
@@ -162,7 +161,7 @@ describe('API Integration Tests', () => {
 
         it('client should see their obligation', async () => {
             const res = await request(app)
-                .get('/obligations')
+                .get('/api/obligations')
                 .set('Authorization', `Bearer ${clientToken}`);
             
             expect(res.status).toBe(200);
@@ -172,7 +171,7 @@ describe('API Integration Tests', () => {
 
         it('client should submit obligation', async () => {
             const res = await request(app)
-                .post(`/obligations/${obligationId}/submit`)
+                .post(`/api/obligations/${obligationId}/submit`)
                 .set('Authorization', `Bearer ${clientToken}`);
             
             expect(res.status).toBe(200);
@@ -181,7 +180,7 @@ describe('API Integration Tests', () => {
 
         it('admin should approve obligation', async () => {
             const res = await request(app)
-                .post(`/obligations/${obligationId}/approve`)
+                .post(`/api/obligations/${obligationId}/approve`)
                 .set('Authorization', `Bearer ${adminToken}`);
             
             expect(res.status).toBe(200);
@@ -192,7 +191,7 @@ describe('API Integration Tests', () => {
     describe('Comments & Attachments', () => {
         it('should allow commenting', async () => {
             const res = await request(app)
-                .post(`/obligations/${obligationId}/comments`)
+                .post(`/api/obligations/${obligationId}/comments`)
                 .set('Authorization', `Bearer ${clientToken}`)
                 .send({ message: 'Done!' });
             
@@ -201,7 +200,7 @@ describe('API Integration Tests', () => {
 
         it('should list comments', async () => {
             const res = await request(app)
-                .get(`/obligations/${obligationId}/comments`)
+                .get(`/api/obligations/${obligationId}/comments`)
                 .set('Authorization', `Bearer ${adminToken}`);
             
             expect(res.status).toBe(200);
@@ -216,7 +215,7 @@ describe('API Integration Tests', () => {
         it('should upload attachment', async () => {
             const buffer = Buffer.from('test file content');
             const res = await request(app)
-                .post(`/obligations/${obligationId}/attachments`)
+                .post(`/api/obligations/${obligationId}/attachments`)
                 .set('Authorization', `Bearer ${clientToken}`)
                 .attach('file', buffer, 'test.txt');
             
@@ -225,7 +224,7 @@ describe('API Integration Tests', () => {
 
         it('should list attachments', async () => {
              const res = await request(app)
-                .get(`/obligations/${obligationId}/attachments`)
+                .get(`/api/obligations/${obligationId}/attachments`)
                 .set('Authorization', `Bearer ${adminToken}`);
              
              expect(res.status).toBe(200);
@@ -237,11 +236,10 @@ describe('API Integration Tests', () => {
     describe('Isolation', () => {
         beforeAll(async () => {
             // Create another client & user
-             const bcrypt = require('bcrypt');
              const hash = await bcrypt.hash(password, 10);
              
              const clientRes = await request(app)
-                .post('/clients')
+                .post('/api/clients')
                 .set('Authorization', `Bearer ${adminToken}`)
                 .send({ name: 'Other Client', email: otherClientEmail });
              otherClientId = clientRes.body.id;
@@ -258,18 +256,18 @@ describe('API Integration Tests', () => {
              });
 
              const res = await request(app)
-                .post('/auth/login')
+                .post('/api/auth/login')
                 .send({ email: otherClientEmail, password });
              otherClientToken = res.body.accessToken;
         });
 
         it('other client should NOT see first client obligations', async () => {
             const res = await request(app)
-                .get('/obligations')
+                .get('/api/obligations')
                 .set('Authorization', `Bearer ${otherClientToken}`);
             
             expect(res.status).toBe(200);
-            const found = res.body.find((o: any) => o.id === obligationId);
+            const found = res.body.find((o: { id: string }) => o.id === obligationId);
             expect(found).toBeUndefined();
         });
     });

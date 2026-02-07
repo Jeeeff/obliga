@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { createInvoice, listInvoices, getInvoice, sendInvoice, payInvoice, downloadInvoicePdf } from '../controllers/invoices';
-import { authenticate } from '../middleware/auth';
 
 const router = Router();
 

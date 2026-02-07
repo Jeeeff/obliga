@@ -2,11 +2,29 @@ import prisma from '../utils/prisma';
 import { generateInvoicePdf } from './pdf.service';
 import { sendEmail } from './email.service';
 import * as paymentService from './payment.service';
+import { Prisma } from '@prisma/client';
+
+interface CreateInvoiceItem {
+    description: string;
+    quantity: number;
+    price: number;
+}
+
+interface CreateInvoiceData {
+    clientId: string;
+    dueDate: string | Date;
+    items: CreateInvoiceItem[];
+}
+
+interface InvoiceFilters {
+    status?: string;
+    clientId?: string;
+}
 
 export const InvoiceService = {
-    async create(tenantId: string, data: any) {
+    async create(tenantId: string, data: CreateInvoiceData) {
         // Calculate total amount from items
-        const amount = data.items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0);
+        const amount = data.items.reduce((sum: number, item: CreateInvoiceItem) => sum + (item.quantity * item.price), 0);
 
         const invoice = await prisma.invoice.create({
             data: {
@@ -16,7 +34,7 @@ export const InvoiceService = {
                 dueDate: new Date(data.dueDate),
                 status: 'PENDING',
                 items: {
-                    create: data.items.map((item: any) => ({
+                    create: data.items.map((item: CreateInvoiceItem) => ({
                         description: item.description,
                         quantity: item.quantity,
                         price: item.price
@@ -32,8 +50,8 @@ export const InvoiceService = {
         return invoice;
     },
 
-    async list(tenantId: string, filters: any = {}) {
-        const where: any = { tenantId };
+    async list(tenantId: string, filters: InvoiceFilters = {}) {
+        const where: Prisma.InvoiceWhereInput = { tenantId };
         
         if (filters.status) where.status = filters.status;
         if (filters.clientId) where.clientId = filters.clientId;
@@ -65,7 +83,17 @@ export const InvoiceService = {
         if (!invoice) throw new Error('Invoice not found');
         if (!invoice.client.email) throw new Error('Client has no email');
 
-        const pdfBuffer = await generateInvoicePdf(invoice);
+        // Convert decimals to number/string for PDF generation
+        const invoiceForPdf = {
+            ...invoice,
+            amount: Number(invoice.amount),
+            items: invoice.items.map(item => ({
+                ...item,
+                price: Number(item.price)
+            }))
+        };
+
+        const pdfBuffer = await generateInvoicePdf(invoiceForPdf);
 
         await sendEmail({
             to: invoice.client.email,

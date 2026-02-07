@@ -20,14 +20,14 @@ function getTenantId(req: AuthRequest): string {
 
 function getParamId(req: AuthRequest): string {
   // Defensive: some request typings can widen to string|string[]
-  const raw: any = (req as any).params?.id
+  const raw = req.params?.id
   const id = Array.isArray(raw) ? raw[0] : raw
   if (!id) throw new Error('Invalid id')
   return String(id)
 }
 
 const getContext = (req: AuthRequest): OpenClawContext => ({
-    requestId: (req as any).id || 'unknown',
+    requestId: req.id || 'unknown',
     actorUserId: req.user!.userId,
     tenantId: req.user!.tenantId,
     featureFlags: {

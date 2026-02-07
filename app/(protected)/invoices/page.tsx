@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { api } from "@/lib/api"
+import { Invoice } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Plus, FileText, Download, Send, CreditCard } from "lucide-react"
+import { Plus, FileText } from "lucide-react"
 
 export default function InvoicesPage() {
-  const [invoices, setInvoices] = useState<any[]>([])
+  const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

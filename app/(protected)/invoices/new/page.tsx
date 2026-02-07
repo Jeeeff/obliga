@@ -47,9 +47,12 @@ export default function NewInvoicePage() {
     setFormData({ ...formData, items: newItems })
   }
 
-  const handleItemChange = (index: number, field: keyof Item, value: any) => {
+  const handleItemChange = (index: number, field: keyof Item, value: string | number) => {
     const newItems = [...formData.items]
-    newItems[index] = { ...newItems[index], [field]: value }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const item: any = { ...newItems[index] }
+    item[field] = value
+    newItems[index] = item
     setFormData({ ...formData, items: newItems })
   }
 

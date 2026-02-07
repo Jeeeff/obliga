@@ -1,4 +1,4 @@
-import { Obligation, Activity, Client, User } from "./types"
+import { Obligation, Client, User } from "./types"
 
 export const mockUsers: User[] = [
   {
