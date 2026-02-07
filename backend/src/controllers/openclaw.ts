@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 // Schemas
 const invoiceSchema = z.object({
+    clientId: z.string(),
     amount: z.number().positive(),
     status: z.enum(['PENDING', 'PAID', 'OVERDUE']).default('PENDING'),
     dueDate: z.string().datetime(), // ISO Date
@@ -95,6 +96,7 @@ export const createInvoice = async (req: OpenClawRequest, res: Response, next: N
         const invoice = await prisma.invoice.create({
             data: {
                 tenantId,
+                clientId: data.clientId,
                 amount: data.amount,
                 status: data.status,
                 dueDate: data.dueDate,

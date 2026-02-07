@@ -1,4 +1,4 @@
-import { prisma } from '../utils/prisma';
+import prisma from '../utils/prisma';
 import { generateInvoicePdf } from './pdf.service';
 import { sendEmail } from './email.service';
 import * as paymentService from './payment.service';

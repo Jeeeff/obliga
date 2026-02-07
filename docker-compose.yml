@@ -1,0 +1,15 @@
+version: '3.8' 
+services: 
+  postgres: 
+    image: postgres:15-alpine 
+    container_name: obliga-postgres 
+    environment: 
+      POSTGRES_USER: obliga 
+      POSTGRES_PASSWORD: obliga123 
+      POSTGRES_DB: obliga_dev 
+    ports: 
+      - "5432:5432" 
+    volumes: 
+      - obliga_data:/var/lib/postgresql/data 
+volumes: 
+  obliga_data:
