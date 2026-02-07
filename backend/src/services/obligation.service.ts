@@ -3,10 +3,10 @@ import { ObligationStatus } from '@prisma/client'
 import { openClaw, OpenClawContext } from '../integrations/openclaw'
 
 export class ObligationService {
-    async list(workspaceId: string, filters: any, userId?: string) {
+    async list(tenantId: string, filters: any, userId?: string) {
         const { status, clientId, q } = filters
         
-        const where: any = { workspaceId }
+        const where: any = { tenantId }
         if (status) where.status = status
         if (clientId) where.clientId = clientId
         if (q) {
@@ -33,24 +33,24 @@ export class ObligationService {
         return obligations.map(this.checkOverdue)
     }
 
-    async create(workspaceId: string, userId: string, data: any, context: OpenClawContext) {
-        // Validate client belongs to workspace
+    async create(tenantId: string, userId: string, data: any, context: OpenClawContext) {
+        // Validate client belongs to tenant
         const client = await prisma.client.findFirst({
-            where: { id: data.clientId, workspaceId }
+            where: { id: data.clientId, tenantId }
         })
-        if (!client) throw new Error("Invalid client for this workspace")
+        if (!client) throw new Error("Invalid client for this tenant")
 
         const obligation = await prisma.obligation.create({
             data: {
                 ...data,
                 status: 'PENDING',
-                workspaceId
+                tenantId
             }
         })
 
         await prisma.activityLog.create({
             data: {
-                workspaceId,
+                tenantId,
                 actorUserId: userId,
                 entityType: 'OBLIGATION',
                 entityId: obligation.id,
@@ -65,9 +65,9 @@ export class ObligationService {
         return obligation
     }
 
-    async get(workspaceId: string, id: string, userId: string) {
+    async get(tenantId: string, id: string, userId: string) {
         let obligation = await prisma.obligation.findFirst({
-            where: { id, workspaceId },
+            where: { id, tenantId },
             include: { client: true, comments: { include: { user: true } }, attachments: true }
         })
 
@@ -84,9 +84,9 @@ export class ObligationService {
         return this.checkOverdue(obligation)
     }
 
-    async update(workspaceId: string, id: string, data: any, context: OpenClawContext) {
+    async update(tenantId: string, id: string, data: any, context: OpenClawContext) {
         const result = await prisma.obligation.updateMany({
-            where: { id, workspaceId },
+            where: { id, tenantId },
             data
         })
 
@@ -95,15 +95,15 @@ export class ObligationService {
         // OpenClaw Hook
         openClaw.analyzeObligation(id, context).catch(console.error)
 
-        return prisma.obligation.findFirst({ where: { id, workspaceId } })
+        return prisma.obligation.findFirst({ where: { id, tenantId } })
     }
 
-    async updateStatus(workspaceId: string, id: string, userId: string, newStatus: ObligationStatus, allowedStatuses: ObligationStatus[], context: OpenClawContext) {
+    async updateStatus(tenantId: string, id: string, userId: string, newStatus: ObligationStatus, allowedStatuses: ObligationStatus[], context: OpenClawContext) {
         // Atomic transition
         const result = await prisma.obligation.updateMany({
             where: { 
                 id, 
-                workspaceId, 
+                tenantId, 
                 status: { in: allowedStatuses } 
             },
             data: { status: newStatus }
@@ -115,7 +115,7 @@ export class ObligationService {
 
         await prisma.activityLog.create({
             data: {
-                workspaceId: workspaceId,
+                tenantId,
                 actorUserId: userId,
                 entityType: 'OBLIGATION',
                 entityId: id,
@@ -129,11 +129,11 @@ export class ObligationService {
             openClaw.suggestActions(id, context).catch(console.error)
         }
 
-        return prisma.obligation.findFirst({ where: { id, workspaceId } })
+        return prisma.obligation.findFirst({ where: { id, tenantId } })
     }
 
-    async addComment(workspaceId: string, id: string, userId: string, message: string, context: OpenClawContext) {
-        const obligation = await prisma.obligation.findFirst({ where: { id, workspaceId } })
+    async addComment(tenantId: string, id: string, userId: string, message: string, context: OpenClawContext) {
+        const obligation = await prisma.obligation.findFirst({ where: { id, tenantId } })
         if (!obligation) throw new Error('Not found')
         
         // Check client access
@@ -146,7 +146,7 @@ export class ObligationService {
 
         const comment = await prisma.comment.create({
             data: {
-                workspaceId,
+                tenantId,
                 obligationId: id,
                 userId,
                 message
@@ -156,7 +156,7 @@ export class ObligationService {
 
         await prisma.activityLog.create({
             data: {
-                workspaceId,
+                tenantId,
                 actorUserId: userId,
                 entityType: 'OBLIGATION',
                 entityId: id,
@@ -167,9 +167,9 @@ export class ObligationService {
         return comment
     }
 
-    async getComments(workspaceId: string, id: string, userId: string) {
+    async getComments(tenantId: string, id: string, userId: string) {
         // Check access first
-        const obligation = await prisma.obligation.findFirst({ where: { id, workspaceId } })
+        const obligation = await prisma.obligation.findFirst({ where: { id, tenantId } })
         if (!obligation) throw new Error('Not found')
         
         const user = await prisma.user.findUnique({ where: { id: userId } })
@@ -180,7 +180,7 @@ export class ObligationService {
         }
 
         return prisma.comment.findMany({
-            where: { obligationId: id, workspaceId },
+            where: { obligationId: id, tenantId },
             include: { user: true },
             orderBy: { createdAt: 'desc' }
         })

@@ -6,15 +6,20 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('Seeding...')
 
-  // 1. Create Workspace
-  let workspace = await prisma.workspace.findFirst({ where: { name: 'DevLogic HQ' } })
-  if (!workspace) {
-    workspace = await prisma.workspace.create({
-      data: { name: 'DevLogic HQ' }
+  // 1. Create Tenant (was Workspace)
+  let tenant = await prisma.tenant.findUnique({ where: { slug: 'devlogic-hq' } })
+  if (!tenant) {
+    tenant = await prisma.tenant.create({
+      data: { 
+        name: 'DevLogic HQ',
+        slug: 'devlogic-hq',
+        plan: 'ENTERPRISE',
+        status: 'ACTIVE'
+      }
     })
-    console.log('Created workspace:', workspace.name)
+    console.log('Created tenant:', tenant.name)
   } else {
-    console.log('Using existing workspace:', workspace.name)
+    console.log('Using existing tenant:', tenant.name)
   }
 
   // 2. Create Clients
@@ -22,11 +27,11 @@ async function main() {
   const clients = []
   
   for (const name of clientNames) {
-    let client = await prisma.client.findFirst({ where: { name, workspaceId: workspace.id } })
+    let client = await prisma.client.findFirst({ where: { name, tenantId: tenant.id } })
     if (!client) {
       client = await prisma.client.create({
         data: {
-          workspaceId: workspace.id,
+          tenantId: tenant.id,
           name,
           email: `contact@${name.toLowerCase().replace(' ', '')}.com`
         }
@@ -44,7 +49,7 @@ async function main() {
     where: { email: 'admin@obliga.com' },
     update: {},
     create: {
-      workspaceId: workspace.id,
+      tenantId: tenant.id,
       name: 'Admin User',
       email: 'admin@obliga.com',
       passwordHash,
@@ -58,7 +63,7 @@ async function main() {
     where: { email: 'client@acme.com' },
     update: { clientId: clients[0].id },
     create: {
-      workspaceId: workspace.id,
+      tenantId: tenant.id,
       name: 'Client User',
       email: 'client@acme.com',
       passwordHash,
@@ -69,7 +74,7 @@ async function main() {
   console.log('Created/Verified Client User: client@acme.com')
 
   // 4. Create Obligations (Only if none exist)
-  const count = await prisma.obligation.count({ where: { workspaceId: workspace.id } })
+  const count = await prisma.obligation.count({ where: { tenantId: tenant.id } })
   if (count === 0) {
       const statuses: ObligationStatus[] = ['PENDING', 'SUBMITTED', 'APPROVED', 'CHANGES_REQUESTED', 'OVERDUE']
       const types: ObligationType[] = ['PAYMENT', 'DOCUMENT', 'APPROVAL']
@@ -91,7 +96,7 @@ async function main() {
     
         await prisma.obligation.create({
           data: {
-            workspaceId: workspace.id,
+            tenantId: tenant.id,
             clientId: client.id,
             title: `Obligation #${i} - ${type}`,
             type,

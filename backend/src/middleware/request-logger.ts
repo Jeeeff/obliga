@@ -20,9 +20,9 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
     const duration = Date.now() - start
     const logLevel = res.statusCode >= 400 ? 'warn' : 'info'
     
-    // Extract user/workspace info if available (set by auth middleware)
+    // Extract user/tenant info if available (set by auth middleware)
     const userId = (req as any).user?.userId
-    const workspaceId = (req as any).user?.workspaceId
+    const tenantId = (req as any).user?.tenantId
 
     logger[logLevel]({
       type: 'request',
@@ -32,7 +32,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
       status: res.statusCode,
       latency: `${duration}ms`,
       userId,
-      workspaceId,
+      tenantId,
       userAgent: req.get('user-agent'),
       ip: req.ip
     })

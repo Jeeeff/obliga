@@ -19,6 +19,7 @@ const translations: Record<Language, Record<string, string>> = {
     clients: "Clients",
     obligations: "Obligations",
     activity: "Activity",
+    invoices: "Invoices",
     reports: "Reports",
     settings: "Settings",
     
@@ -60,6 +61,7 @@ const translations: Record<Language, Record<string, string>> = {
     clients: "Clientes",
     obligations: "Obrigações",
     activity: "Atividade",
+    invoices: "Faturas",
     reports: "Relatórios",
     settings: "Configurações",
     

@@ -17,7 +17,7 @@ const obligationSchema = z.object({
 const getContext = (req: AuthRequest): OpenClawContext => ({
     requestId: (req as any).id || 'unknown',
     actorUserId: req.user!.userId,
-    workspaceId: req.user!.workspaceId,
+    tenantId: req.user!.tenantId,
     featureFlags: {
         OPENCLAW_ENABLED: env.OPENCLAW_ENABLED
     }
@@ -25,13 +25,13 @@ const getContext = (req: AuthRequest): OpenClawContext => ({
 
 export const listObligations = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const workspaceId = req.user?.workspaceId
+    const tenantId = req.user?.tenantId
     const status = req.query.status as string | undefined
     const clientId = req.query.clientId as string | undefined
     const q = req.query.q as string | undefined
 
     const filters = { status, clientId, q }
-    const obligations = await obligationService.list(workspaceId!, filters, req.user!.userId)
+    const obligations = await obligationService.list(tenantId!, filters, req.user!.userId)
 
     res.json(obligations)
   } catch (error) {
@@ -41,13 +41,13 @@ export const listObligations = async (req: AuthRequest, res: Response, next: Nex
 
 export const createObligation = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const workspaceId = req.user?.workspaceId
-    if (!workspaceId) throw new Error("No workspace")
+    const tenantId = req.user?.tenantId
+    if (!tenantId) throw new Error("No tenant")
     
     const data = obligationSchema.parse(req.body)
     const context = getContext(req)
 
-    const obligation = await obligationService.create(workspaceId, req.user!.userId, data, context)
+    const obligation = await obligationService.create(tenantId, req.user!.userId, data, context)
 
     res.status(201).json(obligation)
   } catch (error) {
@@ -57,10 +57,10 @@ export const createObligation = async (req: AuthRequest, res: Response, next: Ne
 
 export const getObligation = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const workspaceId = req.user?.workspaceId
+    const tenantId = req.user?.tenantId
     const { id } = req.params as { id: string }
 
-    const obligation = await obligationService.get(workspaceId!, id, req.user!.userId)
+    const obligation = await obligationService.get(tenantId!, id, req.user!.userId)
 
     if (!obligation) return res.status(404).json({ error: 'Obligation not found' })
 
@@ -75,12 +75,12 @@ export const getObligation = async (req: AuthRequest, res: Response, next: NextF
 
 export const updateObligation = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const workspaceId = req.user?.workspaceId
+        const tenantId = req.user?.tenantId
         const { id } = req.params as { id: string }
         const data = obligationSchema.partial().parse(req.body)
         const context = getContext(req)
 
-        const obligation = await obligationService.update(workspaceId!, id, data, context)
+        const obligation = await obligationService.update(tenantId!, id, data, context)
 
         if (!obligation) return res.status(404).json({ error: 'Obligation not found' })
         res.json(obligation)
@@ -93,11 +93,11 @@ export const updateObligation = async (req: AuthRequest, res: Response, next: Ne
 
 const updateStatus = async (req: AuthRequest, res: Response, next: NextFunction, newStatus: ObligationStatus, allowedStatuses: ObligationStatus[]) => {
     try {
-        const workspaceId = req.user?.workspaceId
+        const tenantId = req.user?.tenantId
         const { id } = req.params as { id: string }
         const context = getContext(req)
         
-        const updated = await obligationService.updateStatus(workspaceId!, id, req.user!.userId, newStatus, allowedStatuses, context)
+        const updated = await obligationService.updateStatus(tenantId!, id, req.user!.userId, newStatus, allowedStatuses, context)
 
         res.json(updated)
     } catch (error) {
@@ -128,14 +128,14 @@ export const resetObligation = (req: AuthRequest, res: Response, next: NextFunct
 
 export const addComment = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const workspaceId = req.user?.workspaceId
+        const tenantId = req.user?.tenantId
         const { id } = req.params as { id: string }
         const { message } = req.body
         const context = getContext(req)
         
         if (!message) return res.status(400).json({ error: "Message required" })
 
-        const comment = await obligationService.addComment(workspaceId!, id, req.user!.userId, message, context)
+        const comment = await obligationService.addComment(tenantId!, id, req.user!.userId, message, context)
 
         res.status(201).json(comment)
     } catch (error) {
@@ -147,10 +147,10 @@ export const addComment = async (req: AuthRequest, res: Response, next: NextFunc
 
 export const getComments = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const workspaceId = req.user?.workspaceId
+        const tenantId = req.user?.tenantId
         const { id } = req.params as { id: string }
         
-        const comments = await obligationService.getComments(workspaceId!, id, req.user!.userId)
+        const comments = await obligationService.getComments(tenantId!, id, req.user!.userId)
         
         res.json(comments)
     } catch (error) {

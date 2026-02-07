@@ -12,6 +12,19 @@ enum Role {
   CLIENT
 }
 
+enum TenantStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum TenantPlan {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
 enum ObligationType {
   PAYMENT
   DOCUMENT
@@ -27,22 +40,30 @@ enum ObligationStatus {
   OVERDUE
 }
 
-model Workspace {
-  id          String       @id @default(cuid())
-  name        String
-  createdAt   DateTime     @default(now())
-  users       User[]
-  clients     Client[]
-  obligations Obligation[]
-  comments    Comment[]
+model Tenant {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  plan         TenantPlan    @default(FREE)
+  status       TenantStatus  @default(ACTIVE)
+  openClawApiKey String?       @unique
+  createdAt    DateTime      @default(now())
+  users        User[]
+  clients      Client[]
+  obligations  Obligation[]
+  comments     Comment[]
   activityLogs ActivityLog[]
-  attachments Attachment[]
+  attachments  Attachment[]
+  transactions Transaction[]
+  invoices     Invoice[]
+
+  @@map("tenants")
 }
 
 model User {
   id           String    @id @default(cuid())
-  workspaceId  String
-  workspace    Workspace @relation(fields: [workspaceId], references: [id])
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id])
   name         String
   email        String    @unique
   passwordHash String
@@ -55,19 +76,20 @@ model User {
 
 model Client {
   id          String       @id @default(cuid())
-  workspaceId String
-  workspace   Workspace    @relation(fields: [workspaceId], references: [id])
+  tenantId    String
+  tenant      Tenant       @relation(fields: [tenantId], references: [id])
   name        String
   email       String?
   createdAt   DateTime     @default(now())
   users       User[]
   obligations Obligation[]
+  invoices    Invoice[]
 }
 
 model Obligation {
   id          String           @id @default(cuid())
-  workspaceId String
-  workspace   Workspace        @relation(fields: [workspaceId], references: [id])
+  tenantId    String
+  tenant      Tenant           @relation(fields: [tenantId], references: [id])
   clientId    String
   client      Client           @relation(fields: [clientId], references: [id])
   title       String
@@ -83,8 +105,8 @@ model Obligation {
 
 model Comment {
   id           String     @id @default(cuid())
-  workspaceId  String
-  workspace    Workspace  @relation(fields: [workspaceId], references: [id])
+  tenantId     String
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
   obligationId String
   obligation   Obligation @relation(fields: [obligationId], references: [id])
   userId       String
@@ -95,8 +117,8 @@ model Comment {
 
 model Attachment {
   id           String     @id @default(cuid())
-  workspaceId  String
-  workspace    Workspace  @relation(fields: [workspaceId], references: [id])
+  tenantId     String
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
   obligationId String
   obligation   Obligation @relation(fields: [obligationId], references: [id])
   fileName     String
@@ -106,12 +128,46 @@ model Attachment {
 
 model ActivityLog {
   id          String   @id @default(cuid())
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
   actorUserId String
   entityType  String   // e.g. OBLIGATION, CLIENT
   entityId    String
   action      String   // e.g. CREATED, STATUS_CHANGED
   meta        Json?
   createdAt   DateTime @default(now())
+}
+
+// Novos Models
+
+model Transaction {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  amount      Decimal
+  description String
+  date        DateTime
+  createdAt   DateTime @default(now())
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id])
+  clientId    String
+  client      Client        @relation(fields: [clientId], references: [id])
+  amount      Decimal
+  status      String        // e.g. PAID, PENDING, OVERDUE
+  dueDate     DateTime
+  items       InvoiceItem[]
+  createdAt   DateTime      @default(now())
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Int
+  price       Decimal
 }

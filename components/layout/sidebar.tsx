@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Users, CheckSquare, Activity, FileText, Settings, Hexagon } from "lucide-react"
+import { LayoutDashboard, Users, CheckSquare, Activity, FileText, Settings, Hexagon, Receipt } from "lucide-react"
 import { useI18n } from "@/lib/i18n"
 import { useStore } from "@/lib/store-context"
 import { cn } from "@/lib/utils"
@@ -36,6 +36,12 @@ export function Sidebar() {
       icon: Activity,
       href: "/activity",
       color: "text-orange-700",
+    },
+    {
+      label: t("invoices"),
+      icon: Receipt,
+      href: "/invoices",
+      color: "text-green-600",
     },
     {
       label: t("reports"),

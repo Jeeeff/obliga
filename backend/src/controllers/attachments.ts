@@ -19,17 +19,17 @@ const storage = multer.diskStorage({
     destination: async (req, file, cb) => {
         try {
             const authReq = req as AuthRequest
-            const workspaceId = authReq.user?.workspaceId
+            const tenantId = authReq.user?.tenantId
             const obligationId = authReq.params.id as string
 
-            if (!workspaceId || !obligationId) {
-                return cb(new Error('Missing workspace or obligation ID'), '')
+            if (!tenantId || !obligationId) {
+                return cb(new Error('Missing tenant or obligation ID'), '')
             }
 
             // Verify permission BEFORE upload
             // This runs for each file, which is slightly inefficient but safe
             const obligation = await prisma.obligation.findFirst({
-                where: { id: obligationId, workspaceId }
+                where: { id: obligationId, tenantId }
             })
 
             if (!obligation) {
@@ -43,7 +43,7 @@ const storage = multer.diskStorage({
                 }
             }
 
-            const dir = path.join(uploadDir, workspaceId, obligationId)
+            const dir = path.join(uploadDir, tenantId, obligationId)
             if (!fs.existsSync(dir)) {
                 fs.mkdirSync(dir, { recursive: true })
             }
@@ -76,13 +76,13 @@ export const uploadAttachment = async (req: AuthRequest, res: Response, next: Ne
             return res.status(400).json({ error: 'No file uploaded' })
         }
 
-        const workspaceId = req.user!.workspaceId
+        const tenantId = req.user!.tenantId
         const obligationId = req.params.id as string
 
         // Create record
         const attachment = await prisma.attachment.create({
             data: {
-                workspaceId,
+                tenantId,
                 obligationId,
                 fileName: req.file.originalname,
                 fileUrl: '' // Placeholder
@@ -105,7 +105,7 @@ export const uploadAttachment = async (req: AuthRequest, res: Response, next: Ne
         // Log activity
         await prisma.activityLog.create({
             data: {
-                workspaceId,
+                tenantId,
                 actorUserId: req.user!.userId,
                 entityType: 'OBLIGATION',
                 entityId: obligationId,
@@ -126,12 +126,12 @@ export const uploadAttachment = async (req: AuthRequest, res: Response, next: Ne
 
 export const listAttachments = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const workspaceId = req.user!.workspaceId
+        const tenantId = req.user!.tenantId
         const obligationId = req.params.id as string
 
         // Check permissions
         const obligation = await prisma.obligation.findFirst({
-            where: { id: obligationId, workspaceId }
+            where: { id: obligationId, tenantId }
         })
 
         if (!obligation) return res.status(404).json({ error: 'Obligation not found' })
@@ -143,7 +143,7 @@ export const listAttachments = async (req: AuthRequest, res: Response, next: Nex
         }
 
         const attachments = await prisma.attachment.findMany({
-            where: { obligationId, workspaceId },
+            where: { obligationId, tenantId },
             orderBy: { createdAt: 'desc' }
         })
 
@@ -155,11 +155,11 @@ export const listAttachments = async (req: AuthRequest, res: Response, next: Nex
 
 export const downloadAttachment = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const workspaceId = req.user!.workspaceId
+        const tenantId = req.user!.tenantId
         const attachmentId = req.params.id as string // This is attachment ID from route /attachments/:id/download
 
         const attachment = await prisma.attachment.findFirst({
-            where: { id: attachmentId, workspaceId },
+            where: { id: attachmentId, tenantId },
             include: { obligation: true }
         })
 
@@ -176,7 +176,7 @@ export const downloadAttachment = async (req: AuthRequest, res: Response, next: 
 
         // Construct file path
         // We need to find the file on disk. 
-        // We stored it in uploads/workspaceId/obligationId/FILENAME
+        // We stored it in uploads/tenantId/obligationId/FILENAME
         // Wait, in storage.filename we used a UUID name. 
         // But we didn't store the *on-disk* filename in the DB? 
         // Ah, schema has `fileUrl`. I stored `/attachments/:id/download`.
@@ -191,7 +191,7 @@ export const downloadAttachment = async (req: AuthRequest, res: Response, next: 
         // Better approach for this task without migration:
         // Use `fileUrl` to store the download path, and maybe repurpose a field? 
         // No, let's look at `Attachment` model again.
-        // `id`, `workspaceId`, `obligationId`, `fileName`, `fileUrl`, `createdAt`.
+        // `id`, `tenantId`, `obligationId`, `fileName`, `fileUrl`, `createdAt`.
         
         // I can change how I save the file. 
         // If I save the file as `attachment.id` (UUID), I can find it easily!
@@ -219,7 +219,7 @@ export const downloadAttachment = async (req: AuthRequest, res: Response, next: 
         // Try to find the file.
         // If I renamed it to `attachment.id` + ext, I can find it.
         
-        const filePath = path.join(uploadDir, workspaceId, attachment.obligationId, `${attachment.id}${ext}`)
+        const filePath = path.join(uploadDir, tenantId, attachment.obligationId, `${attachment.id}${ext}`)
         
         if (!fs.existsSync(filePath)) {
              // Fallback: maybe we haven't implemented the rename logic yet?

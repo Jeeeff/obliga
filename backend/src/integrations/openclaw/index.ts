@@ -4,7 +4,7 @@ import { env } from '../../config/env'
 export interface OpenClawContext {
     requestId: string
     actorUserId: string
-    workspaceId: string
+    tenantId: string
     featureFlags?: Record<string, boolean>
 }
 

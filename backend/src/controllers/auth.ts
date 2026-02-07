@@ -11,10 +11,12 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   role: z.enum(['ADMIN', 'CLIENT']),
-  workspaceName: z.string().optional(), // If creating a new workspace
-  workspaceId: z.string().optional(), // If joining existing
+  tenantName: z.string().optional(), // If creating a new tenant
+  tenantId: z.string().optional(), // If joining existing
   clientId: z.string().optional(), // If CLIENT
 })
+
+import { emailService } from '../services/email.service'
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -26,7 +28,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         }
     }
 
-    const { name, email, password, role, workspaceName, workspaceId, clientId } = registerSchema.parse(req.body)
+    const { name, email, password, role, tenantName, tenantId, clientId } = registerSchema.parse(req.body)
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({ where: { email } })
@@ -34,27 +36,30 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       return res.status(400).json({ error: 'User already exists' })
     }
 
-    let targetWorkspaceId = workspaceId
+    let targetTenantId = tenantId
 
-    // Create workspace if not provided
-    if (!targetWorkspaceId && workspaceName) {
-      const workspace = await prisma.workspace.create({
-        data: { name: workspaceName }
+    // Create tenant if not provided
+    if (!targetTenantId && tenantName) {
+      // Generate slug from name (simple version)
+      const slug = tenantName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.floor(Math.random() * 1000)
+      
+      const tenant = await prisma.tenant.create({
+        data: { name: tenantName, slug, plan: 'FREE', status: 'ACTIVE' }
       })
-      targetWorkspaceId = workspace.id
+      targetTenantId = tenant.id
     }
 
-    if (!targetWorkspaceId) {
-      return res.status(400).json({ error: 'Workspace ID or Name required' })
+    if (!targetTenantId) {
+      return res.status(400).json({ error: 'Tenant ID or Name required' })
     }
 
     // Validate client if provided
     if (clientId) {
         const client = await prisma.client.findFirst({
-            where: { id: clientId, workspaceId: targetWorkspaceId }
+            where: { id: clientId, tenantId: targetTenantId }
         })
         if (!client) {
-            return res.status(400).json({ error: 'Invalid client for this workspace' })
+            return res.status(400).json({ error: 'Invalid client for this tenant' })
         }
     }
 
@@ -66,10 +71,21 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         email,
         passwordHash,
         role,
-        workspaceId: targetWorkspaceId,
+        tenantId: targetTenantId,
         clientId
       }
     })
+
+    // Send welcome email
+    try {
+        const tenant = await prisma.tenant.findUnique({ where: { id: targetTenantId } })
+        if (tenant) {
+            await emailService.sendWelcomeEmail(user.email, user.name, tenant.name)
+        }
+    } catch (emailError) {
+        // Don't fail registration if email fails
+        console.error('Failed to send welcome email', emailError)
+    }
 
     const tokens = generateTokens(user)
     res.json(tokens)
@@ -125,7 +141,7 @@ export const me = async (req: AuthRequest, res: Response, next: NextFunction) =>
     try {
         const user = await prisma.user.findUnique({
             where: { id: req.user?.userId },
-            include: { workspace: true, client: true }
+            include: { tenant: true, client: true }
         })
         
         if (!user) return res.status(404).json({ error: 'User not found' })

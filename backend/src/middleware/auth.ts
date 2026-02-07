@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { verifyAccessToken } from '../utils/jwt'
+import { context } from '../utils/context'
 
 export interface AuthRequest extends Request {
   user?: {
     userId: string
-    workspaceId: string
+    tenantId: string
     role: 'ADMIN' | 'CLIENT'
     clientId?: string | null
   }
@@ -13,7 +14,7 @@ export interface AuthRequest extends Request {
 
 const tokenPayloadSchema = z.object({
   userId: z.string(),
-  workspaceId: z.string(),
+  tenantId: z.string(),
   role: z.enum(['ADMIN', 'CLIENT']),
   clientId: z.string().nullable().optional(),
 })
@@ -33,7 +34,11 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
     const payload = tokenPayloadSchema.parse(decoded)
 
     req.user = payload
-    next()
+    
+    // Wrap next() in context.run to propagate tenantId to Prisma Extension
+    context.run({ tenantId: payload.tenantId, userId: payload.userId }, () => {
+      next()
+    })
   } catch (_error) {
     return res.status(401).json({ error: 'Unauthorized: Invalid token' })
   }

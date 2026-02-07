@@ -6,13 +6,13 @@ const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret'
 
 export const generateTokens = (user: User) => {
   const accessToken = jwt.sign(
-    { userId: user.id, workspaceId: user.workspaceId, role: user.role, clientId: user.clientId },
+    { userId: user.id, tenantId: user.tenantId, role: user.role, clientId: user.clientId },
     ACCESS_SECRET,
     { expiresIn: '15m' }
   )
 
   const refreshToken = jwt.sign(
-    { userId: user.id, workspaceId: user.workspaceId, role: user.role, clientId: user.clientId },
+    { userId: user.id, tenantId: user.tenantId, role: user.role, clientId: user.clientId },
     REFRESH_SECRET,
     { expiresIn: '7d' }
   )

@@ -10,7 +10,7 @@ describe('API Integration Tests', () => {
     let adminToken: string;
     let clientToken: string;
     let otherClientToken: string;
-    let workspaceId: string;
+    let tenantId: string;
     let clientId: string;
     let otherClientId: string;
     let obligationId: string;
@@ -21,27 +21,25 @@ describe('API Integration Tests', () => {
     const password = 'password123';
 
     beforeAll(async () => {
-        // Create Workspace
-        const workspace = await prisma.workspace.create({
-            data: { name: `${TEST_PREFIX} Workspace` }
+        // Create Tenant
+        const tenant = await prisma.tenant.create({
+            data: { 
+                name: `${TEST_PREFIX} Tenant`,
+                slug: `${TEST_PREFIX.toLowerCase()}-tenant`,
+                plan: 'PRO',
+                status: 'ACTIVE'
+            }
         });
-        workspaceId = workspace.id;
+        tenantId = tenant.id;
 
         // Create Admin
         await prisma.user.create({
             data: {
                 email: adminEmail,
                 name: 'Test Admin',
-                passwordHash: '$2b$10$EpIxNwllqWq7qqK1W.y/..h./.y/.y/.y/.y/.y/.y/.y/.y/.y', // Mock hash (not used if we hit login endpoint with real bcrypt, wait. We need real hash or create via register?)
-                // Actually, login endpoint checks password. I need to register or insert with known hash.
-                // I'll rely on the fact that I can't register easily in production mode.
-                // So I will insert a user with a KNOWN hash for "password123".
-                // Hash for "password123" is approx: $2b$10$EpIxNwllqWq7qqK1W.y/.. (need real hash)
-                // Better: Use a helper or just create the user and generate token manually?
-                // No, I want to test /auth/login.
-                // I'll generate a real hash using bcrypt.
+                passwordHash: '$2b$10$EpIxNwllqWq7qqK1W.y/..h./.y/.y/.y/.y/.y/.y/.y/.y/.y', // Mock hash
                 role: 'ADMIN',
-                workspaceId
+                tenantId
             }
         });
         
@@ -59,13 +57,13 @@ describe('API Integration Tests', () => {
 
     afterAll(async () => {
         // Cleanup
-        await prisma.activityLog.deleteMany({ where: { workspaceId } });
-        await prisma.comment.deleteMany({ where: { obligation: { workspaceId } } });
-        await prisma.attachment.deleteMany({ where: { obligation: { workspaceId } } });
-        await prisma.obligation.deleteMany({ where: { workspaceId } });
-        await prisma.user.deleteMany({ where: { workspaceId } });
-        await prisma.client.deleteMany({ where: { workspaceId } });
-        await prisma.workspace.delete({ where: { id: workspaceId } });
+        await prisma.activityLog.deleteMany({ where: { tenantId } });
+        await prisma.comment.deleteMany({ where: { tenantId } });
+        await prisma.attachment.deleteMany({ where: { tenantId } });
+        await prisma.obligation.deleteMany({ where: { tenantId } });
+        await prisma.user.deleteMany({ where: { tenantId } });
+        await prisma.client.deleteMany({ where: { tenantId } });
+        await prisma.tenant.delete({ where: { id: tenantId } });
         await prisma.$disconnect();
     });
 
@@ -127,8 +125,8 @@ describe('API Integration Tests', () => {
                      name: 'Test Client User',
                      passwordHash: hash,
                      role: 'CLIENT',
-                     workspaceId,
-                     clientId
+                    tenantId,
+                    clientId
                  }
              });
 
@@ -254,7 +252,7 @@ describe('API Integration Tests', () => {
                      name: 'Other User',
                      passwordHash: hash,
                      role: 'CLIENT',
-                     workspaceId,
+                     tenantId,
                      clientId: otherClientId
                  }
              });

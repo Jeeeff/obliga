@@ -14,6 +14,9 @@ import clientRoutes from './routes/clients'
 import obligationRoutes from './routes/obligations'
 import activityRoutes from './routes/activity'
 import attachmentRoutes from './routes/attachments'
+import tenantRoutes from './routes/tenants'
+import openClawRoutes from './routes/openclaw'
+import webhookRoutes from './routes/webhooks'
 
 const app = express()
 
@@ -49,12 +52,23 @@ app.get('/readyz', async (req, res) => {
   }
 })
 
+import { authenticate } from './middleware/auth'
+import { openClawAuth } from './middleware/openclaw-auth'
+
 // Routes
 app.use('/auth', authLimiter, authRoutes) // Apply stricter limit to auth
 app.use('/clients', clientRoutes)
 app.use('/obligations', obligationRoutes)
 app.use('/activity', activityRoutes)
 app.use('/attachments', attachmentRoutes)
+
+// Invoices (Support both Frontend/JWT and OpenClaw/ApiKey)
+app.use('/invoices', authenticate, invoiceRoutes)
+app.use('/api/invoices', openClawAuth, invoiceRoutes)
+
+app.use('/api/tenants', tenantRoutes)
+app.use('/api/openclaw', openClawRoutes)
+app.use('/api/webhooks', webhookRoutes)
 
 // Root
 app.get('/', (req, res) => {

@@ -4,10 +4,10 @@ import { AuthRequest } from '../middleware/auth'
 
 export const listActivity = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const workspaceId = req.user?.workspaceId
+    const tenantId = req.user?.tenantId
     const { entityType, entityId } = req.query
 
-    const where: any = { workspaceId }
+    const where: any = { tenantId }
     if (entityType) where.entityType = String(entityType)
     if (entityId) where.entityId = String(entityId)
 
