@@ -11,6 +11,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const { t } = useI18n()
   const { user } = useStore()
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "0.1.0"
 
   const routes = [
     {
@@ -91,7 +92,7 @@ export function Sidebar() {
       <div className="px-3 py-2 border-t">
         <div className="bg-muted/50 rounded-lg p-3 text-center">
             <p className="text-sm font-medium truncate">{user?.tenantName || "Obliga"}</p>
-            <p className="text-xs text-muted-foreground">v0.1.0</p>
+            <p className="text-xs text-muted-foreground">v{appVersion}</p>
         </div>
       </div>
     </div>

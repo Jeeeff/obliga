@@ -21,7 +21,7 @@ export default function SettingsPage() {
         <Card>
             <CardHeader>
                 <CardTitle>{t("profile")}</CardTitle>
-                <CardDescription>Manage your personal information</CardDescription>
+                <CardDescription>{t("manage_personal_info")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="flex items-center gap-4">
@@ -29,44 +29,44 @@ export default function SettingsPage() {
                         <AvatarImage src={user.avatar} />
                         <AvatarFallback>{user.name[0]}</AvatarFallback>
                     </Avatar>
-                    <Button variant="outline">Change Avatar</Button>
+                    <Button variant="outline">{t("change_avatar")}</Button>
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Full Name</label>
+                    <label className="text-sm font-medium">{t("profile")}</label>
                     <Input defaultValue={user.name} />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Email</label>
+                    <label className="text-sm font-medium">{t("email")}</label>
                     <Input defaultValue={user.email} disabled />
                 </div>
-                <Button>Save Changes</Button>
+                <Button>{t("save_changes")}</Button>
             </CardContent>
         </Card>
 
         <Card>
             <CardHeader>
-                <CardTitle>Preferences</CardTitle>
-                <CardDescription>Customize your workspace experience</CardDescription>
+                <CardTitle>{t("workspace")}</CardTitle>
+                <CardDescription>{t("customize_workspace")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                        <label className="text-sm font-medium">Theme</label>
-                        <p className="text-xs text-muted-foreground">Select your preferred interface theme</p>
+                        <label className="text-sm font-medium">{t("theme")}</label>
+                        <p className="text-xs text-muted-foreground">{t("select_theme")}</p>
                     </div>
                     <ThemeToggle />
                 </div>
                 <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                        <label className="text-sm font-medium">Language</label>
-                        <p className="text-xs text-muted-foreground">Select your preferred language</p>
+                        <label className="text-sm font-medium">{t("language")}</label>
+                        <p className="text-xs text-muted-foreground">{t("select_language")}</p>
                     </div>
                     <LanguageToggle />
                 </div>
                 <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                         <label className="text-sm font-medium">Notifications</label>
-                        <p className="text-xs text-muted-foreground">Receive email updates about obligations</p>
+                        <p className="text-xs text-muted-foreground">{t("email_notifications")}</p>
                     </div>
                     {/* Mock Switch */}
                     <div className="w-10 h-6 bg-primary rounded-full relative cursor-pointer">

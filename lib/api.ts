@@ -2,11 +2,7 @@
 
 // Config point for API base URL with fallback
 // NEXT_PUBLIC_API_BASE_URL can be set in .env.local
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  (process.env.NODE_ENV === "production"
-    ? "https://api.obliga.devlogicstudio.cloud"
-    : "http://localhost:3001/api")
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export class ApiError extends Error {
   status: number

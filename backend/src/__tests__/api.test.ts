@@ -3,7 +3,7 @@ import request from 'supertest';
 import app from '../index';
 import prisma from '../utils/prisma';
 import { expect } from '@jest/globals';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const TEST_PREFIX = `test_${Date.now()}`;
 

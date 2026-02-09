@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import prisma from '../utils/prisma'
 import { generateTokens, verifyRefreshToken } from '../utils/jwt'
 import { z } from 'zod'

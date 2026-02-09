@@ -54,6 +54,14 @@ const translations: Record<Language, Record<string, string>> = {
     profile: "Profile",
     workspace: "Workspace",
     logout: "Log out",
+    change_avatar: "Change Avatar",
+    save_changes: "Save Changes",
+    manage_personal_info: "Manage your personal information",
+    customize_workspace: "Customize your workspace experience",
+    select_theme: "Select your preferred interface theme",
+    select_language: "Select your preferred language",
+    email_notifications: "Receive email updates about obligations",
+    new_obligation: "New Obligation",
   },
   pt: {
     // Sidebar
@@ -96,6 +104,14 @@ const translations: Record<Language, Record<string, string>> = {
     profile: "Perfil",
     workspace: "Espaço de Trabalho",
     logout: "Sair",
+    change_avatar: "Alterar avatar",
+    save_changes: "Salvar alterações",
+    manage_personal_info: "Gerencie suas informações pessoais",
+    customize_workspace: "Personalize sua experiência de trabalho",
+    select_theme: "Selecione o tema da interface",
+    select_language: "Selecione o idioma preferido",
+    email_notifications: "Receba atualizações por e-mail sobre obrigações",
+    new_obligation: "Nova obrigação",
   },
 }
 

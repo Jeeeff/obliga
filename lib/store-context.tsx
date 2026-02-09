@@ -133,18 +133,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }
 
   const updateObligationStatus = async (id: string, status: ObligationStatus) => {
-      try {
-          await api.put(`/obligations/${id}/status`, { body: JSON.stringify({ status }) })
-          await fetchObligations()
-      } catch (e: unknown) {
-          const msg = e instanceof Error ? e.message : 'Unknown error'
-          toast("Failed to update status: " + msg, "error")
+    try {
+      let path: string | null = null
+
+      if (status === "SUBMITTED") path = `/obligations/${id}/submit`
+      else if (status === "APPROVED") path = `/obligations/${id}/approve`
+      else if (status === "CHANGES_REQUESTED") path = `/obligations/${id}/request-changes`
+      else if (status === "PENDING") path = `/obligations/${id}/reset`
+
+      if (!path) {
+        throw new Error("Unsupported status transition")
       }
+
+      await api.post(path, {})
+      await fetchObligations()
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Unknown error"
+      toast("Failed to update status: " + msg, "error")
+    }
   }
 
   const createClient = async (client: Omit<Client, "id" | "status" | "logo">) => {
       try {
-          await api.post("/clients", { body: JSON.stringify(client) })
+          await api.post("/clients", client)
           await fetchClients()
           toast("Client created successfully", "success")
       } catch (e: unknown) {
