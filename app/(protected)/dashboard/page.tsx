@@ -171,10 +171,10 @@ export default function DashboardPage() {
 
         {/* OpenClaw Insight */}
         <div className="col-span-1 md:col-span-2">
-            <div className="rounded-xl p-[1px] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 h-full">
+            <div className="rounded-xl p-[1px] bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-indigo-500 dark:via-purple-500 dark:to-pink-500 h-full">
                 <Card className="h-full border-none shadow-inner bg-card/95 backdrop-blur-sm">
                     <CardHeader>
-                        <CardTitle className="bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent font-bold">
+                        <CardTitle className="bg-gradient-to-r from-slate-800 to-slate-600 dark:from-indigo-500 dark:to-pink-500 bg-clip-text text-transparent font-bold">
                             {t("openclaw_insight")}
                         </CardTitle>
                     </CardHeader>
@@ -186,21 +186,21 @@ export default function DashboardPage() {
                             <div className="text-xs font-medium uppercase text-muted-foreground">Recommendations</div>
                             <ul className="space-y-2 text-sm">
                                 <li className="flex items-start gap-2">
-                                    <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 mt-1.5" />
+                                    <div className="h-1.5 w-1.5 rounded-full bg-slate-500 dark:bg-indigo-500 mt-1.5" />
                                     <span>Prioritize overdue payments for Client A</span>
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <div className="h-1.5 w-1.5 rounded-full bg-purple-500 mt-1.5" />
+                                    <div className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-purple-500 mt-1.5" />
                                     <span>Review document expirations for next week</span>
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <div className="h-1.5 w-1.5 rounded-full bg-pink-500 mt-1.5" />
+                                    <div className="h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-pink-500 mt-1.5" />
                                     <span>Approve pending request #O-123</span>
                                 </li>
                             </ul>
                         </div>
                         <Button 
-                            className="w-full mt-4 bg-gradient-to-r from-indigo-500 to-pink-500 hover:from-indigo-600 hover:to-pink-600 text-white border-0"
+                            className="w-full mt-4 bg-slate-900 hover:bg-slate-800 text-slate-50 border border-slate-900/10 dark:bg-gradient-to-r dark:from-indigo-500 dark:to-pink-500 dark:hover:from-indigo-600 dark:hover:to-pink-600 dark:text-white dark:border-0"
                             onClick={() => setShowRecommendations(true)}
                         >
                             {t("view_recommendations")}
