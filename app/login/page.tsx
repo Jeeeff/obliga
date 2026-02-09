@@ -12,10 +12,12 @@ import { useI18n } from "@/lib/i18n"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
 import { api } from "@/lib/api"
+import { useStore } from "@/lib/store-context"
 
 export default function LoginPage() {
   const router = useRouter()
   const { t } = useI18n()
+  const { retry } = useStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -35,12 +37,14 @@ export default function LoginPage() {
 
       if (data && data.accessToken) {
         localStorage.setItem("accessToken", data.accessToken);
-        console.log("Access token stored. Redirecting to /dashboard...");
+        console.log("Access token stored. Loading user context...");
+        await retry();
+        console.log("User context loaded. Redirecting to /dashboard...");
         router.push("/dashboard");
-        console.log("Redirect command issued.");
       } else {
         console.error("Login successful, but no access token received.");
         setError("An unexpected error occurred. Missing access token.");
+        setLoading(false)
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Login failed"
