@@ -19,6 +19,7 @@ interface StoreContextType {
   retry: () => Promise<void>
   createClient: (client: Omit<Client, "id" | "status" | "logo">) => Promise<void>
   addActivity: (activity: Activity) => void
+  updateUserProfile: (data: Pick<User, "name" | "avatar">) => void
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined)
@@ -169,6 +170,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setActivities((prev) => [activity, ...prev])
   }
 
+  const updateUserProfile = (data: Pick<User, "name" | "avatar">) => {
+    setUser((prev) => {
+      if (!prev) return prev
+      return { ...prev, ...data }
+    })
+  }
+
   return (
     <StoreContext.Provider
       value={{
@@ -184,6 +192,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         retry,
         createClient,
         addActivity,
+        updateUserProfile,
       }}
     >
       {children}
