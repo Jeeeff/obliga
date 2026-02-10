@@ -25,10 +25,13 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Status
     pending: "Pending",
+    in_progress: "In Progress",
     submitted: "Submitted",
     under_review: "Under Review",
     approved: "Approved",
     overdue: "Overdue",
+    rejected: "Rejected",
+    changes_requested: "Changes Requested",
     at_risk: "At Risk",
     completed: "Completed",
     
@@ -62,6 +65,7 @@ const translations: Record<Language, Record<string, string>> = {
     select_language: "Select your preferred language",
     email_notifications: "Receive email updates about obligations",
     new_obligation: "New Obligation",
+    changes_saved: "Changes saved successfully",
   },
   pt: {
     // Sidebar
@@ -75,10 +79,13 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Status
     pending: "Pendente",
+    in_progress: "Em andamento",
     submitted: "Enviado",
     under_review: "Em Análise",
     approved: "Aprovado",
     overdue: "Atrasado",
+    rejected: "Rejeitado",
+    changes_requested: "Alterações solicitadas",
     at_risk: "Em Risco",
     completed: "Concluído",
     
@@ -112,6 +119,7 @@ const translations: Record<Language, Record<string, string>> = {
     select_language: "Selecione o idioma preferido",
     email_notifications: "Receba atualizações por e-mail sobre obrigações",
     new_obligation: "Nova obrigação",
+    changes_saved: "Alterações salvas com sucesso",
   },
 }
 

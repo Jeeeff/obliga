@@ -1,5 +1,6 @@
 import { Router, RequestHandler } from 'express'
 import { getSummary, getAlerts, createInvoice, getCashflow } from '../controllers/openclaw'
+import { executeSkill } from '../controllers/openclaw-skills'
 import { openClawAuth } from '../middleware/openclaw-auth'
 import { rateLimit } from 'express-rate-limit'
 
@@ -20,5 +21,6 @@ router.get('/summary', getSummary as RequestHandler)
 router.get('/alerts', getAlerts as RequestHandler)
 router.post('/invoice', createInvoice as RequestHandler)
 router.get('/cashflow', getCashflow as RequestHandler)
+router.post('/skills/execute', executeSkill as RequestHandler)
 
 export default router

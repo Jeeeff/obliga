@@ -99,6 +99,11 @@ const loginSchema = z.object({
   password: z.string(),
 })
 
+const updateProfileSchema = z.object({
+  name: z.string().min(2).optional(),
+  avatar: z.string().url().max(500).optional(),
+})
+
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = loginSchema.parse(req.body)
@@ -153,4 +158,25 @@ export const me = async (req: AuthRequest, res: Response, next: NextFunction) =>
     } catch (error) {
         next(error)
     }
+}
+
+export const updateMe = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?.userId
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' })
+
+    const data = updateProfileSchema.parse(req.body)
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data,
+      include: { tenant: true, client: true },
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash, ...userData } = user
+    res.json(userData)
+  } catch (error) {
+    next(error)
+  }
 }

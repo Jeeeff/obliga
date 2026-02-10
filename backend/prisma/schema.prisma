@@ -73,6 +73,7 @@ model User {
   client       Client?   @relation(fields: [clientId], references: [id])
   createdAt    DateTime  @default(now())
   comments     Comment[]
+  avatar       String?
 }
 
 model Client {

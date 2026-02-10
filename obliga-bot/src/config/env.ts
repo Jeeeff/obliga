@@ -22,6 +22,9 @@ if (Number.isNaN(port)) {
 
 const obligaApiUrl = getEnv("OBLIGA_API_URL", true) as string
 const telegramBotToken = getEnv("TELEGRAM_BOT_TOKEN", true) as string
+const whatsappBaseUrl = getEnv("WHATSAPP_BASE_URL", false, "https://graph.facebook.com") as string
+const whatsappPhoneNumberId = getEnv("WHATSAPP_PHONE_NUMBER_ID", false, "") as string
+const whatsappAccessToken = getEnv("WHATSAPP_ACCESS_TOKEN", false, "") as string
 const logLevel = (getEnv("LOG_LEVEL", false, "info") as string).toLowerCase()
 
 export const env = {
@@ -29,5 +32,8 @@ export const env = {
   port,
   obligaApiUrl,
   telegramBotToken,
+  whatsappBaseUrl,
+  whatsappPhoneNumberId,
+  whatsappAccessToken,
   logLevel,
 }
