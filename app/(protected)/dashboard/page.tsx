@@ -64,7 +64,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">+2 from last month</p>
+            <p className="text-xs text-muted-foreground">{t("increase_15")}</p>
           </CardContent>
         </Card>
         <Card>
@@ -74,7 +74,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.pending}</div>
-            <p className="text-xs text-muted-foreground">Due within 7 days</p>
+            <p className="text-xs text-muted-foreground">{t("due_within_7_days")}</p>
           </CardContent>
         </Card>
         <Card>
@@ -84,7 +84,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.atRisk}</div>
-            <p className="text-xs text-muted-foreground">Action required immediately</p>
+            <p className="text-xs text-muted-foreground">{t("action_required_immediately")}</p>
           </CardContent>
         </Card>
         <Card>
@@ -94,7 +94,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.completed}</div>
-            <p className="text-xs text-muted-foreground">15% increase</p>
+            <p className="text-xs text-muted-foreground">{t("increase_15")}</p>
           </CardContent>
         </Card>
             </>
@@ -163,7 +163,7 @@ export default function DashboardPage() {
               ))
               )}
               <Button variant="ghost" className="w-full" asChild>
-                  <Link href="/obligations">View All</Link>
+                  <Link href="/obligations">{t("view_all")}</Link>
               </Button>
             </div>
           </CardContent>
@@ -180,22 +180,24 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <p className="text-sm text-muted-foreground">
-                            Based on your activity, you have <span className="font-bold text-foreground">{stats.atRisk} obligations</span> requiring immediate attention. Your efficiency score is trending up.
+                            {t("openclaw_risk_message")}
                         </p>
                         <div className="space-y-2">
-                            <div className="text-xs font-medium uppercase text-muted-foreground">Recommendations</div>
+                            <div className="text-xs font-medium uppercase text-muted-foreground">
+                                {t("recommendations")}
+                            </div>
                             <ul className="space-y-2 text-sm">
                                 <li className="flex items-start gap-2">
                                     <div className="h-1.5 w-1.5 rounded-full bg-slate-500 dark:bg-indigo-500 mt-1.5" />
-                                    <span>Prioritize overdue payments for Client A</span>
+                                    <span>{t("review_pending_document")}</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <div className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-purple-500 mt-1.5" />
-                                    <span>Review document expirations for next week</span>
+                                    <span>{t("review_pending_document")}</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <div className="h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-pink-500 mt-1.5" />
-                                    <span>Approve pending request #O-123</span>
+                                    <span>{t("review_pending_document")}</span>
                                 </li>
                             </ul>
                         </div>
@@ -225,7 +227,9 @@ export default function DashboardPage() {
                 className="fixed inset-y-0 right-0 z-[100] w-full max-w-md border-l bg-card p-6 shadow-2xl"
             >
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold">{t("openclaw_insight")} - Details</h3>
+                    <h3 className="text-lg font-bold">
+                        {t("openclaw_insight")} - {t("openclaw_details")}
+                    </h3>
                     <Button variant="ghost" size="icon" onClick={() => setShowRecommendations(false)}>
                         <X className="h-4 w-4" />
                     </Button>
@@ -234,24 +238,30 @@ export default function DashboardPage() {
                     <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
                         <h4 className="font-medium mb-2 flex items-center gap-2">
                             <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                            Risk Analysis
+                            {t("risk_analysis")}
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                            High probability of delay detected for &quot;Alvará de Funcionamento&quot; due to recent regulatory changes. Suggest early submission.
+                            {t("openclaw_risk_message")}
                         </p>
                     </div>
                     
                     <div className="space-y-4">
-                        <h4 className="font-medium">Action Items</h4>
+                        <h4 className="font-medium">{t("action_items")}</h4>
                         {[1, 2, 3].map((i) => (
                             <div key={i} className="flex gap-3 p-3 border rounded-lg hover:bg-muted/50 transition">
                                 <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
                                     {i}
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium">Review pending document {i}</p>
-                                    <p className="text-xs text-muted-foreground">Estimated time: 5 mins</p>
-                                    <Button variant="link" className="h-auto p-0 text-xs mt-1">Take action <ArrowRight className="h-3 w-3 ml-1" /></Button>
+                                    <p className="text-sm font-medium">
+                                        {t("review_pending_document")} {i}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {t("estimated_time_5_min")}
+                                    </p>
+                                    <Button variant="link" className="h-auto p-0 text-xs mt-1">
+                                        {t("take_action")} <ArrowRight className="h-3 w-3 ml-1" />
+                                    </Button>
                                 </div>
                             </div>
                         ))}

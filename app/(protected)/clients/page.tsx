@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus } from "lucide-react"
+import { Plus, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,6 +20,7 @@ export default function ClientsPage() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [newClientName, setNewClientName] = useState("")
   const [newClientEmail, setNewClientEmail] = useState("")
+  const [newClientCnpj, setNewClientCnpj] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
   // Obligation Modal State
@@ -67,17 +68,18 @@ export default function ClientsPage() {
     
     setSubmitting(true)
     try {
-        await createClient({
-            name: newClientName,
-            email: newClientEmail,
-        })
-        setNewClientName("")
-        setNewClientEmail("")
-        setShowAddModal(false)
+      await createClient({
+        name: newClientName,
+        email: newClientEmail,
+      })
+      setNewClientName("")
+      setNewClientEmail("")
+      setNewClientCnpj("")
+      setShowAddModal(false)
     } catch {
-        // Error handled in store
+      // Error handled in store
     } finally {
-        setSubmitting(false)
+      setSubmitting(false)
     }
   }
 
@@ -91,7 +93,7 @@ export default function ClientsPage() {
                     <Plus className="h-4 w-4" /> Add Obligation
                 </Button>
                 <Button onClick={() => setShowAddModal(true)} className="gap-2">
-                    <Plus className="h-4 w-4" /> Add Client
+                    <Plus className="h-4 w-4" /> {t("add_client")}
                 </Button>
             </div>
         )}
@@ -127,9 +129,9 @@ export default function ClientsPage() {
                         </Badge>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Obligations</span>
-                            <span className="font-medium">--</span>
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>CNPJ</span>
+                            <span className="font-medium">Disponível a partir do plano Essencial</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -142,24 +144,73 @@ export default function ClientsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
             <Card className="w-full max-w-md shadow-lg border">
                 <CardHeader>
-                    <CardTitle>Add New Client</CardTitle>
+                    <CardTitle>{t("add_client")}</CardTitle>
                 </CardHeader>
                 <form onSubmit={handleAddClient}>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Client Name</label>
-                            <Input value={newClientName} onChange={(e) => setNewClientName(e.target.value)} placeholder="Company Ltd." required />
+                            <label className="text-sm font-medium">Nome do cliente</label>
+                            <Input
+                              value={newClientName}
+                              onChange={(e) => setNewClientName(e.target.value)}
+                              placeholder="Empresa Exemplo Ltda."
+                              required
+                            />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Email (Optional)</label>
-                            <Input value={newClientEmail} onChange={(e) => setNewClientEmail(e.target.value)} placeholder="contact@company.com" type="email" />
+                            <label className="text-sm font-medium">E-mail (opcional)</label>
+                            <Input
+                              value={newClientEmail}
+                              onChange={(e) => setNewClientEmail(e.target.value)}
+                              placeholder="contato@empresa.com"
+                              type="email"
+                            />
+                        </div>
+                        <div className="space-y-1 border-t pt-4">
+                          <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium flex items-center gap-2">
+                              CNPJ
+                              <Lock className="h-3 w-3 text-muted-foreground" />
+                            </label>
+                            <span className="text-[10px] uppercase text-muted-foreground">
+                              Disponível a partir do plano Essencial
+                            </span>
+                          </div>
+                          <Input
+                            value={newClientCnpj}
+                            onChange={(e) => setNewClientCnpj(e.target.value)}
+                            placeholder="00.000.000/0001-00"
+                            disabled
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium flex items-center gap-2">
+                              Dados fiscais avançados
+                              <Lock className="h-3 w-3 text-muted-foreground" />
+                            </label>
+                            <span className="text-[10px] uppercase text-muted-foreground">
+                              Disponível nos planos Essencial e acima
+                            </span>
+                          </div>
+                          <Input
+                            placeholder="Inscrição estadual, regime tributário, etc."
+                            disabled
+                          />
                         </div>
                     </CardContent>
-                    <div className="flex justify-end gap-2 p-6 pt-0">
-                        <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)} disabled={submitting}>Cancel</Button>
-                        <Button type="submit" disabled={submitting}>
-                            {submitting ? "Creating..." : "Create Client"}
-                        </Button>
+                    <div className="flex justify-between items-center gap-2 p-6 pt-0">
+                        <div className="text-xs text-muted-foreground">
+                          Campos fiscais completos estarão disponíveis na sua primeira versão paga.
+                        </div>
+                        <div className="flex gap-2">
+                          <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)} disabled={submitting}>
+                            Cancelar
+                          </Button>
+                          <Button type="submit" disabled={submitting}>
+                              {submitting ? "Criando..." : "Criar cliente"}
+                          </Button>
+                        </div>
                     </div>
                 </form>
             </Card>

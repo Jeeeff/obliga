@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useI18n } from "@/lib/i18n"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,8 @@ export default function SettingsPage() {
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const handleSave = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -31,6 +33,46 @@ export default function SettingsPage() {
     updateUserProfile({ name, avatar })
     toast(t("changes_saved"), "success")
     setSaving(false)
+  }
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!file) return
+    setUploadingAvatar(true)
+    try {
+      const formData = new FormData()
+      formData.append("avatar", file)
+
+      const updatedUser = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me/avatar`,
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            Authorization:
+              typeof window !== "undefined"
+                ? `Bearer ${localStorage.getItem("accessToken") || ""}`
+                : "",
+          },
+        },
+      ).then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text()
+          throw new Error(text || "Falha ao enviar avatar")
+        }
+        return res.json()
+      })
+
+      updateUserProfile({
+        name: updatedUser.name,
+        avatar: updatedUser.avatar,
+      })
+      toast(t("changes_saved"), "success")
+    } catch (error) {
+      console.error(error)
+      toast("Não foi possível enviar o avatar. Tente novamente.", "error")
+    } finally {
+      setUploadingAvatar(false)
+    }
   }
 
   if (!user) {
@@ -59,6 +101,32 @@ export default function SettingsPage() {
                   <AvatarImage src={user.avatar} />
                   <AvatarFallback>{user.name[0]}</AvatarFallback>
                 </Avatar>
+                <div className="space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                  >
+                    {uploadingAvatar ? "Enviando..." : t("change_avatar")}
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        void handleAvatarUpload(file)
+                      }
+                    }}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Imagem quadrada, até 5MB.
+                  </p>
+                </div>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t("profile")}</label>
@@ -105,7 +173,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <label className="text-sm font-medium">Notifications</label>
+                <label className="text-sm font-medium">{t("notifications")}</label>
                 <p className="text-xs text-muted-foreground">{t("email_notifications")}</p>
               </div>
               <button

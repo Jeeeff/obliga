@@ -76,6 +76,7 @@ app.get("/readyz", async (req, res) => {
 
 // Routes
 app.use("/api/auth", authLimiter, authRoutes) // Apply stricter limit to auth
+app.use("/uploads/avatars", express.static("uploads/avatars"))
 app.use("/api/clients", clientRoutes)
 app.use("/api/obligations", obligationRoutes)
 app.use("/api/activity", activityRoutes)

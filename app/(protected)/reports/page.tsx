@@ -13,15 +13,14 @@
          <h2 className="text-3xl font-bold tracking-tight">{t("reports")}</h2>
        </div>
 
-       <Card>
-         <CardHeader>
-           <CardTitle>Coming soon</CardTitle>
-         </CardHeader>
-         <CardContent className="space-y-4">
-           <p className="text-sm text-muted-foreground">
-             High-level financial and obligations reports will appear here. For now, you can use the dashboard,
-             obligations, and invoices pages to explore your data.
-           </p>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("coming_soon")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {t("reports_description")}
+          </p>
            <div className="grid gap-4 md:grid-cols-3">
              <div className="space-y-2">
                <Skeleton className="h-4 w-24" />

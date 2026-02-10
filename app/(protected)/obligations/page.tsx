@@ -74,7 +74,7 @@ export default function ObligationsPage() {
 
       <div className="flex items-center gap-4">
         <Input
-          placeholder="Filter obligations..."
+          placeholder={t("filter_obligations_placeholder")}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="max-w-sm"
@@ -88,24 +88,24 @@ export default function ObligationsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[300px]">Title</TableHead>
+              <TableHead className="w-[300px]">{t("title")}</TableHead>
               <TableHead>
                 <Button variant="ghost" onClick={() => setSort("client")}>
-                  Client <ArrowUpDown className="ml-2 h-4 w-4" />
+                  {t("client")} <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
-              <TableHead>Type</TableHead>
+              <TableHead>{t("type")}</TableHead>
               <TableHead>
                 <Button variant="ghost" onClick={() => setSort("status")}>
-                  Status <ArrowUpDown className="ml-2 h-4 w-4" />
+                  {t("status_column")} <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
               <TableHead>
                 <Button variant="ghost" onClick={() => setSort("dueDate")}>
-                  Due Date <ArrowUpDown className="ml-2 h-4 w-4" />
+                  {t("due_date")} <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right">{t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -148,14 +148,16 @@ export default function ObligationsPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
                         <DropdownMenuItem asChild>
                             <Link href={`/obligations/${item.id}`} className="flex items-center cursor-pointer">
-                                <Eye className="mr-2 h-4 w-4" /> View Details
+                                <Eye className="mr-2 h-4 w-4" /> {t("view_details")}
                             </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                        <DropdownMenuItem asChild>
+                            <Link href={`/obligations/${item.id}`} className="flex items-center cursor-pointer">
+                                <Pencil className="mr-2 h-4 w-4" /> {t("edit")}
+                            </Link>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -203,7 +205,7 @@ export default function ObligationsPage() {
                   <Input
                     value={newObligation.title}
                     onChange={(e) => setNewObligation({ ...newObligation, title: e.target.value })}
-                    placeholder="e.g. Monthly VAT"
+                    placeholder={t("obligation_title_placeholder")}
                     required
                   />
                 </div>
@@ -225,7 +227,7 @@ export default function ObligationsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Type</label>
+                    <label className="text-sm font-medium">{t("type")}</label>
                     <select
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       value={newObligation.type}
@@ -233,13 +235,13 @@ export default function ObligationsPage() {
                         setNewObligation({ ...newObligation, type: e.target.value as ObligationType })
                       }
                     >
-                      <option value="PAYMENT">Payment</option>
-                      <option value="DOCUMENT">Document</option>
-                      <option value="APPROVAL">Approval</option>
+                      <option value="PAYMENT">{t("payment")}</option>
+                      <option value="DOCUMENT">{t("document")}</option>
+                      <option value="APPROVAL">{t("approval")}</option>
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Due Date</label>
+                    <label className="text-sm font-medium">{t("due_date_label")}</label>
                     <Input
                       type="date"
                       value={newObligation.dueDate}
@@ -249,11 +251,11 @@ export default function ObligationsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Description</label>
+                  <label className="text-sm font-medium">{t("description")}</label>
                   <Input
                     value={newObligation.description}
                     onChange={(e) => setNewObligation({ ...newObligation, description: e.target.value })}
-                    placeholder="Optional details"
+                    placeholder={t("description_placeholder")}
                   />
                 </div>
               </div>
@@ -264,10 +266,10 @@ export default function ObligationsPage() {
                   onClick={() => setShowNewModal(false)}
                   disabled={submitting}
                 >
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button type="submit" disabled={submitting}>
-                  {submitting ? "Creating..." : "Create"}
+                  {submitting ? t("creating") : t("create")}
                 </Button>
               </div>
             </form>
