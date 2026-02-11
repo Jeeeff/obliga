@@ -1,6 +1,6 @@
 import dotenv from "dotenv"
 
-dotenv.config()
+dotenv.config({ override: true })
 
 function getEnv(name: string, required: boolean, defaultValue?: string) {
   const value = process.env[name]
@@ -21,7 +21,7 @@ if (Number.isNaN(port)) {
 }
 
 const obligaApiUrl = getEnv("OBLIGA_API_URL", true) as string
-const telegramBotToken = getEnv("TELEGRAM_BOT_TOKEN", true) as string
+const telegramBotToken = getEnv("TELEGRAM_BOT_TOKEN", false, "") as string
 const whatsappBaseUrl = getEnv("WHATSAPP_BASE_URL", false, "https://graph.facebook.com") as string
 const whatsappPhoneNumberId = getEnv("WHATSAPP_PHONE_NUMBER_ID", false, "") as string
 const whatsappAccessToken = getEnv("WHATSAPP_ACCESS_TOKEN", false, "") as string
