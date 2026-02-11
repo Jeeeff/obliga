@@ -11,7 +11,12 @@ async function main() {
   const logger = bootstrapLogger
 
   const obligaClient = new ObligaClient(env.obligaApiUrl, createLogger("ObligaClient"))
-  const bot = createBot(env.telegramBotToken, obligaClient, createLogger("TelegramBot"))
+
+  const enableTelegram = env.nodeEnv === "production"
+  const hasTelegramBot = enableTelegram && !!env.telegramBotToken
+  const bot = hasTelegramBot
+    ? createBot(env.telegramBotToken, obligaClient, createLogger("TelegramBot"))
+    : null
 
   const whatsappClient =
     env.whatsappPhoneNumberId && env.whatsappAccessToken
@@ -36,6 +41,22 @@ async function main() {
       return
     }
 
+    if (req.method === "GET" && req.url && req.url.startsWith("/whatsapp/webhook")) {
+      const url = new URL(req.url, `http://localhost:${env.port}`)
+      const mode = url.searchParams.get("hub.mode")
+      const token = url.searchParams.get("hub.verify_token")
+      const challenge = url.searchParams.get("hub.challenge")
+
+      if (mode === "subscribe" && token === "obliga-dev-verify") {
+        res.statusCode = 200
+        res.end(challenge || "OK")
+      } else {
+        res.statusCode = 403
+        res.end("Forbidden")
+      }
+      return
+    }
+
     if (req.method === "POST" && req.url === "/whatsapp/webhook") {
       let body = ""
       req.on("data", (chunk) => {
@@ -51,12 +72,25 @@ async function main() {
           const from = message?.from
           const text = message?.text?.body as string | undefined
 
+          logger.info(
+            {
+              hasWhatsAppClient: !!whatsappClient,
+              from,
+              text,
+              rawType: message?.type
+            },
+            "Webhook WhatsApp recebido"
+          )
+
           if (whatsappClient && from && text) {
             const reply =
               "Olá, esta é uma demonstração do Obliga com OpenClaw.\n" +
               "No plano gratuito, você pode conectar seu painel e receber resumos básicos de obrigações."
             whatsappClient
               .sendTextMessage({ to: from, text: reply })
+              .then(() => {
+                logger.info({ to: from }, "Resposta WhatsApp enviada com sucesso")
+              })
               .catch((error) => logger.error({ error }, "Erro ao responder mensagem WhatsApp"))
           }
 
@@ -75,7 +109,9 @@ async function main() {
     res.end()
   })
 
-  await bot.start()
+  if (bot) {
+    await bot.start()
+  }
 
   server.listen(env.port, () => {
     logger.info({ port: env.port }, "Servidor HTTP do bot iniciado")
@@ -86,8 +122,10 @@ async function main() {
     server.close(() => {
       logger.info("Servidor HTTP encerrado")
     })
-    await bot.stop()
-    logger.info("Bot Telegram encerrado")
+    if (bot) {
+      await bot.stop()
+      logger.info("Bot Telegram encerrado")
+    }
     process.exit(0)
   }
 
@@ -100,6 +138,15 @@ async function main() {
 }
 
 main().catch((error) => {
-  bootstrapLogger.error({ error }, "Erro fatal ao iniciar obliga-bot")
+  const errorMessage = error instanceof Error ? error.message : String(error)
+  const errorStack = error instanceof Error ? error.stack : undefined
+
+  bootstrapLogger.error(
+    {
+      errorMessage,
+      errorStack
+    },
+    "Erro fatal ao iniciar obliga-bot"
+  )
   process.exit(1)
 })
