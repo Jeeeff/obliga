@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { CheckSquare, Users, FileText, BarChart3, Bell, Building2, Hexagon, Check } from "lucide-react"
+import { CheckSquare, Users, FileText, BarChart3, Bell, Building2, Hexagon, Check, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -13,6 +13,15 @@ import { useStore } from "@/lib/store-context"
 export default function Home() {
   const { user, loading } = useStore()
   const router = useRouter()
+
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER
+  const whatsappMessage =
+    process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ||
+    "Olá, gostaria de agendar uma demonstração do Obliga / tirar uma dúvida sobre a versão gratuita."
+
+  const whatsappLink =
+    whatsappNumber &&
+    `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
 
   useEffect(() => {
     if (!loading && user) {
@@ -212,6 +221,29 @@ export default function Home() {
               <p className="text-sm text-muted-foreground">
                 Comece no plano Básico gratuito e evolua conforme a maturidade do seu escritório.
               </p>
+            </div>
+
+            <div className="max-w-3xl mx-auto">
+              <div className="grid grid-cols-3 text-xs md:text-sm border rounded-lg overflow-hidden">
+                <div className="bg-muted px-3 py-2 font-medium text-left">Recurso</div>
+                <div className="bg-muted px-3 py-2 font-medium text-center">Gratuito</div>
+                <div className="bg-muted px-3 py-2 font-medium text-center">Essencial</div>
+                <div className="px-3 py-2">Clientes e obrigações</div>
+                <div className="px-3 py-2 text-center">Até 5 clientes e 20 obrigações ativas</div>
+                <div className="px-3 py-2 text-center">Sem limite prático para uso diário</div>
+                <div className="px-3 py-2">Campos fiscais completos (CNPJ, dados fiscais)</div>
+                <div className="px-3 py-2 text-center">Somente visualização limitada</div>
+                <div className="px-3 py-2 text-center">Cadastro fiscal completo liberado</div>
+                <div className="px-3 py-2">Análise de risco com OpenClaw</div>
+                <div className="px-3 py-2 text-center">Análise rápida e simplificada</div>
+                <div className="px-3 py-2 text-center">Análise completa e detalhada</div>
+                <div className="px-3 py-2">Notificações por e-mail</div>
+                <div className="px-3 py-2 text-center">Alertas básicos de vencimento</div>
+                <div className="px-3 py-2 text-center">Camada avançada de alertas e SLA</div>
+                <div className="px-3 py-2">Relatórios e dashboards</div>
+                <div className="px-3 py-2 text-center">Visão operacional simples</div>
+                <div className="px-3 py-2 text-center">Relatórios aprimorados e dashboards adicionais</div>
+              </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -467,11 +499,24 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t">
+      <footer className="border-t relative">
         <div className="container mx-auto px-4 py-6 text-xs text-muted-foreground flex flex-col md:flex-row items-center justify-between gap-2">
           <span>Obliga · Gestão inteligente de obrigações fiscais</span>
           <span>Feito com tecnologias modernas de nuvem e segurança.</span>
         </div>
+        {whatsappLink && (
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noreferrer"
+            className="fixed bottom-6 right-6 z-[90] inline-flex items-center gap-2 rounded-full bg-emerald-500 text-white px-4 py-2 shadow-lg hover:bg-emerald-600 transition"
+          >
+            <MessageCircle className="h-5 w-5" />
+            <span className="text-sm font-medium hidden sm:inline">
+              Falar no WhatsApp
+            </span>
+          </a>
+        )}
       </footer>
     </div>
   )

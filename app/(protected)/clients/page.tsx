@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Lock } from "lucide-react"
+import { Plus, Lock, Activity as ActivityIcon, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -22,6 +22,15 @@ export default function ClientsPage() {
   const [newClientEmail, setNewClientEmail] = useState("")
   const [newClientCnpj, setNewClientCnpj] = useState("")
   const [submitting, setSubmitting] = useState(false)
+
+  const [riskModalOpen, setRiskModalOpen] = useState(false)
+  const [riskLoading, setRiskLoading] = useState(false)
+  const [riskResult, setRiskResult] = useState<{
+    clientName: string
+    label: string
+    description: string
+    upgradeMessage: string
+  } | null>(null)
 
   // Obligation Modal State
   const [showObligationModal, setShowObligationModal] = useState(false)
@@ -83,6 +92,32 @@ export default function ClientsPage() {
     }
   }
 
+  const handleRiskAnalysis = async (clientId: string, clientName: string) => {
+    setRiskLoading(true)
+    try {
+      const result = await api.get(`/clients/${clientId}/risk-teaser`)
+      setRiskResult({
+        clientName,
+        label: result.label,
+        description: result.description,
+        upgradeMessage: result.upgradeMessage,
+      })
+      setRiskModalOpen(true)
+    } catch (error) {
+      console.error(error)
+      setRiskResult({
+        clientName,
+        label: "Análise indisponível",
+        description: "Não foi possível obter a análise de risco básica neste momento.",
+        upgradeMessage:
+          "Tente novamente em alguns minutos. Para ter acesso à análise completa, considere fazer upgrade para um plano pago.",
+      })
+      setRiskModalOpen(true)
+    } finally {
+      setRiskLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -115,26 +150,42 @@ export default function ClientsPage() {
              ))
         ) : (
             clients.map((client) => (
-                <Card key={client.id} className="hover:shadow-md transition-shadow cursor-pointer">
-                    <CardHeader className="flex flex-row items-center gap-4">
-                        <Avatar className="h-12 w-12">
-                            <AvatarFallback className="bg-primary/10 text-primary font-bold">{client.logo || client.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                            <CardTitle className="text-base">{client.name}</CardTitle>
-                            <p className="text-sm text-muted-foreground">{client.email}</p>
-                        </div>
-                        <Badge variant={client.status === "Active" ? "success" : "secondary"}>
-                            {client.status}
-                        </Badge>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>CNPJ</span>
-                            <span className="font-medium">Disponível a partir do plano Essencial</span>
-                        </div>
-                    </CardContent>
-                </Card>
+              <Card key={client.id} className="hover:shadow-md transition-shadow">
+                <CardHeader className="flex flex-row items-center gap-4">
+                  <Avatar className="h-12 w-12">
+                    <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                      {client.logo || client.name.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <CardTitle className="text-base">{client.name}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{client.email}</p>
+                  </div>
+                  <Badge variant={client.status === "Active" ? "success" : "secondary"}>
+                    {client.status}
+                  </Badge>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>CNPJ</span>
+                    <span className="font-medium">Disponível a partir do plano Essencial</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                      <ActivityIcon className="h-3 w-3" />
+                      <span>Análise de risco básica com OpenClaw</span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={riskLoading}
+                      onClick={() => handleRiskAnalysis(client.id, client.name)}
+                    >
+                      {riskLoading ? "Analisando..." : "Análise rápida"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))
         )}
       </div>
@@ -289,6 +340,34 @@ export default function ClientsPage() {
                     </div>
                 </form>
             </Card>
+        </div>
+      )}
+
+      {riskModalOpen && riskResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <Card className="w-full max-w-md shadow-lg border">
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                Análise rápida de risco
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm font-medium">{riskResult.clientName}</p>
+              <p className="text-sm">
+                <span className="font-semibold">{riskResult.label}</span>
+              </p>
+              <p className="text-sm text-muted-foreground">{riskResult.description}</p>
+              <div className="text-xs text-muted-foreground border-t pt-3">
+                {riskResult.upgradeMessage}
+              </div>
+            </CardContent>
+            <div className="flex justify-end gap-2 p-6 pt-0">
+              <Button variant="outline" onClick={() => setRiskModalOpen(false)}>
+                Fechar
+              </Button>
+            </div>
+          </Card>
         </div>
       )}
     </div>

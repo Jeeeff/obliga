@@ -16,6 +16,11 @@ import Link from "next/link"
 export default function DashboardPage() {
   const { t } = useI18n()
   const { obligations, loading } = useStore()
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (typeof window === "undefined") return false
+    const done = window.localStorage.getItem("obligaOnboardingDone")
+    return !done
+  })
   const [showRecommendations, setShowRecommendations] = useState(false)
   const [filter, setFilter] = useState("")
 
@@ -33,6 +38,48 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 relative">
+      {showOnboarding && (
+        <div className="rounded-xl border bg-background p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="space-y-2">
+            <p className="text-sm font-medium">
+              Bem-vindo à versão gratuita do Obliga
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Siga estes passos para começar:
+            </p>
+            <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+              <li>1. Crie seu primeiro cliente em Clientes.</li>
+              <li>2. Adicione sua primeira obrigação para esse cliente.</li>
+              <li>3. Use a análise rápida de risco na página de Clientes.</li>
+            </ul>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex gap-2">
+              <Link href="/clients">
+                <button className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium hover:bg-muted">
+                  Ir para Clientes
+                </button>
+              </Link>
+              <Link href="/obligations">
+                <button className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium hover:bg-muted">
+                  Ir para Obrigações
+                </button>
+              </Link>
+            </div>
+            <button
+              className="text-[11px] text-muted-foreground hover:underline"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.localStorage.setItem("obligaOnboardingDone", "1")
+                }
+                setShowOnboarding(false)
+              }}
+            >
+              Já entendi, pode esconder
+            </button>
+          </div>
+        </div>
+      )}
       <div className="flex flex-col md:flex-row justify-between gap-4 md:items-center">
         <h2 className="text-3xl font-bold tracking-tight">{t("dashboard")}</h2>
         <div className="flex gap-2">

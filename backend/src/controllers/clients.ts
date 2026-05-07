@@ -86,6 +86,43 @@ export const getClient = async (req: AuthRequest, res: Response, next: NextFunct
   }
 }
 
+export const getClientRiskTeaser = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const tenantId = getTenantId(req)
+    const id = getParamId(req)
+    const { role, clientId } = req.user!
+
+    const client = await clientService.get(tenantId, id, role, clientId || undefined)
+
+    if (!client) return res.status(404).json({ error: 'Client not found' })
+
+    const source = (client.name + (client.email || "")).toLowerCase()
+    let hash = 0
+    for (let i = 0; i < source.length; i += 1) {
+      hash += source.charCodeAt(i)
+    }
+    const index = hash % 3
+    const levels = [
+      { level: "LOW", label: "Risco Baixo", description: "Cliente com baixa probabilidade de atraso com base em sinais básicos." },
+      { level: "MEDIUM", label: "Risco Médio", description: "Alguns sinais de atenção. Vale acompanhar obrigações e pagamentos com mais cuidado." },
+      { level: "HIGH", label: "Risco Alto", description: "Indícios de maior probabilidade de atraso. Recomendado reforçar acompanhamento e comunicações." },
+    ]
+
+    const result = levels[index]
+
+    res.json({
+      clientId: client.id,
+      level: result.level,
+      label: result.label,
+      description: result.description,
+      upgradeMessage:
+        "Para análise de risco completa e detalhada, faça upgrade para o plano Essencial ou Profissional com OpenClaw completo.",
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const updateClient = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     // Only ADMIN can update clients

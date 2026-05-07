@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { listClients, createClient, getClient, updateClient, deleteClient } from '../controllers/clients'
+import { listClients, createClient, getClient, updateClient, deleteClient, getClientRiskTeaser } from '../controllers/clients'
 import { authenticate, requireRole } from '../middleware/auth'
 
 const router = Router()
@@ -9,6 +9,7 @@ router.use(authenticate)
 router.get('/', listClients)
 router.post('/', requireRole(['ADMIN']), createClient)
 router.get('/:id', getClient)
+router.get('/:id/risk-teaser', getClientRiskTeaser)
 router.patch('/:id', requireRole(['ADMIN']), updateClient)
 router.delete('/:id', requireRole(['ADMIN']), deleteClient)
 
